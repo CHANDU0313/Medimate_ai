@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediMate AI - Live Web Experience</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    /* Clean custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.4); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 0.6); }
+    @keyframes pulseAlert {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.008); opacity: 0.95; }
+    }
+    .emergency-pulse {
+      animation: pulseAlert 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased p-3 sm:p-5 selection:bg-blue-100 selection:text-blue-900 font-sans min-h-screen">
+
+  <div class="max-w-6xl mx-auto space-y-4">
+    <!-- Top Hero Navigation Header -->
+    <header class="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 font-bold text-xl">
+          🩺
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg sm:text-xl font-bold tracking-tight text-slate-900" id="ui-app-title">
+              MediMate AI
+            </h1>
+            <span class="px-2 py-0.5 text-xs font-semibold bg-blue-100 text-blue-700 rounded-md">
+              Hackathon Edition
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 font-medium" id="ui-tagline">
+            Your health questions, explained simply.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+        <!-- Live Server Status Indicator -->
+        <a href="http://localhost:5173" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 transition-colors shadow-2xs" title="Click to open local React server in new tab">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+          <span>Open Full App (Port 5173) ↗</span>
+        </a>
+
+        <!-- Demo Mode Badge -->
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-xs font-medium text-amber-800">
+          <span>🟡 Demo Mode Active</span>
+        </span>
+
+        <!-- Language Switcher -->
+        <select id="language-select" onchange="changeLanguage(this.value)" class="text-xs font-semibold bg-slate-100 text-slate-700 py-1.5 px-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+          <option value="en">English (Simple)</option>
+          <option value="te">తెలుగు (Telugu)</option>
+          <option value="hi">हिन्दी (Hindi)</option>
+        </select>
+
+        <!-- Clear Session Data Button -->
+        <button onclick="clearSessionData()" class="text-xs px-2.5 py-1.5 text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-xl border border-slate-200 transition-colors" title="Purge local storage">
+          🗑️ Clear data
+        </button>
+      </div>
+    </header>
+
+    <!-- Emergency Red Alert Container (Hidden until emergency detected) -->
+    <div id="emergency-banner" class="hidden w-full bg-red-600 text-white rounded-2xl shadow-xl p-5 border-4 border-red-700 emergency-pulse">
+      <div class="flex items-start gap-4">
+        <div class="text-3xl p-2 bg-red-700 rounded-xl">🚨</div>
+        <div class="flex-1 space-y-2">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <h2 class="text-base sm:text-lg font-black uppercase tracking-wide text-white" id="emergency-title">
+              CRITICAL MEDICAL EMERGENCY DETECTED
+            </h2>
+            <span class="px-2.5 py-0.5 bg-white text-red-700 text-xs font-bold rounded-full">
+              Seek Immediate Care
+            </span>
+          </div>
+          <p class="text-xs sm:text-sm text-red-100 leading-relaxed font-medium" id="emergency-desc">
+            The symptoms described may indicate an acute, life-threatening situation. Do NOT wait at home.
+          </p>
+          <div class="flex gap-2 flex-wrap pt-1">
+            <a href="tel:108" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white text-red-700 rounded-xl font-bold text-xs shadow-md">
+              📞 Call Ambulance: 108
+            </a>
+            <a href="tel:112" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-800 text-white rounded-xl font-bold text-xs border border-red-400 shadow-md">
+              📞 National Emergency: 112
+            </a>
+            <a href="tel:14416" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-900 text-white rounded-xl font-bold text-xs border border-red-500 shadow-md">
+              🧠 Mental Health (Tele-MANAS): 14416
+            </a>
+          </div>
+          <div class="text-xs text-red-200 pt-1">
+            • Go to nearest emergency room immediately • Do NOT drive yourself • Keep calm while help arrives.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main 3-Column Dashboard Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+      
+      <!-- LEFT COLUMN: Recent Sessions & Quick Health Tips -->
+      <div class="lg:col-span-3 space-y-4">
+        <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+            <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">🕒 Recent Sessions</span>
+            <button onclick="startNewSession()" class="text-xs text-blue-600 hover:text-blue-700 font-semibold bg-blue-50 px-2 py-1 rounded-lg">
+              + New
+            </button>
+          </div>
+          <div class="space-y-1.5" id="sessions-list">
+            <div class="p-2.5 rounded-xl bg-blue-50/80 border border-blue-200 text-xs font-medium text-blue-900 cursor-pointer flex items-center justify-between">
+              <span class="truncate">I've had a headache since...</span>
+              <span class="px-1.5 py-0.5 bg-blue-200 text-blue-800 text-[10px] rounded font-bold">Sample</span>
+            </div>
+          </div>
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs text-slate-500 leading-relaxed">
+            💡 <strong>Patient Tip:</strong> Recording when symptoms began and their severity helps your doctor diagnose issues faster.
+          </div>
+        </div>
+      </div>
+
+      <!-- CENTER COLUMN: Health Chat & Symptom Form Tabs -->
+      <div class="lg:col-span-5 space-y-4">
+        <!-- Tab Switcher -->
+        <div class="flex items-center bg-slate-200/70 p-1 rounded-xl text-xs font-bold">
+          <button id="tab-btn-chat" onclick="switchTab('chat')" class="flex-1 py-2 rounded-lg bg-white text-blue-700 shadow-xs text-center transition-all">
+            💬 AI Health Chat
+          </button>
+          <button id="tab-btn-form" onclick="switchTab('form')" class="flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center transition-all">
+            📋 Symptom Form
+          </button>
+        </div>
+
+        <!-- Chat View -->
+        <div id="view-chat" class="bg-white rounded-2xl border border-slate-200/90 shadow-sm flex flex-col h-[580px] overflow-hidden">
+          <!-- Chat Header -->
+          <div class="px-4 py-3 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
+                AI
+              </div>
+              <div>
+                <h3 class="text-xs font-bold text-slate-800" id="chat-title">AI Health Chat</h3>
+                <span class="text-[11px] text-slate-400">Simple, plain-language guidance</span>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full" id="sample-badge">
+              Sample conversation
+            </span>
+          </div>
+
+          <!-- Messages Body -->
+          <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-3">
+            <!-- Sample User Message -->
+            <div class="flex justify-end">
+              <div class="max-w-[85%] bg-blue-600 text-white rounded-2xl rounded-br-xs px-3.5 py-2.5 text-xs leading-relaxed shadow-xs">
+                I've had a dull headache since this morning after working on my laptop for 4 hours. What could be causing this?
+              </div>
+            </div>
+
+            <!-- Sample AI Message -->
+            <div class="flex justify-start">
+              <div class="max-w-[85%] bg-slate-100 text-slate-800 rounded-2xl rounded-bl-xs px-3.5 py-2.5 text-xs leading-relaxed shadow-xs space-y-2">
+                <p>
+                  Headaches that develop after prolonged screen time are very frequently linked to <strong>eye strain, muscle tension</strong> in the neck, or <strong>mild dehydration</strong>.
+                </p>
+                <div class="bg-white/80 p-2.5 rounded-xl border border-slate-200 text-xs space-y-1">
+                  <span class="font-bold text-slate-700 block">Gentle comfort measures:</span>
+                  <div>• Practice the 20-20-20 rule (look 20 feet away for 20 seconds).</div>
+                  <div>• Sip a tall glass of room-temperature water.</div>
+                  <div>• Rest in a quiet, dimly lit space for 15 minutes.</div>
+                </div>
+                <p class="text-slate-500 text-[11px] italic">
+                  Note: If a headache comes on suddenly like a "thunderclap", consult a doctor immediately.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Starter Prompts -->
+          <div class="p-2.5 bg-slate-50 border-t border-slate-100">
+            <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">Suggested Starters:</span>
+            <div class="flex gap-1.5 overflow-x-auto pb-1">
+              <button onclick="sendStarter('Why do I get a headache after screen time?')" class="text-xs px-2.5 py-1 bg-white hover:bg-blue-50 text-slate-700 font-medium rounded-lg border border-slate-200 whitespace-nowrap">
+                💻 Screen headache
+              </button>
+              <button onclick="sendStarter('Safe ways to soothe a sore throat at home?')" class="text-xs px-2.5 py-1 bg-white hover:bg-blue-50 text-slate-700 font-medium rounded-lg border border-slate-200 whitespace-nowrap">
+                🍵 Sore throat tips
+              </button>
+              <button onclick="triggerEmergencyDemo()" class="text-xs px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-700 font-bold rounded-lg border border-red-200 whitespace-nowrap">
+                🚨 Emergency Test
+              </button>
+            </div>
+          </div>
+
+          <!-- Input bar -->
+          <form onsubmit="handleChatSubmit(event)" class="p-3 bg-white border-t border-slate-100 flex items-center gap-2">
+            <input type="text" id="chat-input" placeholder="Ask any health question simply..." class="flex-1 px-3.5 py-2 text-xs bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-xl shadow-xs transition-colors">
+              Send
+            </button>
+          </form>
+        </div>
+
+        <!-- Symptom Form View (Initially Hidden) -->
+        <div id="view-form" class="hidden bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 sm:p-5 space-y-4">
+          <div class="border-b border-slate-100 pb-2 flex items-center justify-between">
+            <h3 class="text-sm font-bold text-slate-900">Symptom Information Form</h3>
+            <span class="text-xs text-slate-400">* Required</span>
+          </div>
+
+          <!-- Quick Presets -->
+          <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100 space-y-1.5">
+            <span class="text-[11px] font-bold text-slate-500 uppercase">⚡ Quick Demo Presets:</span>
+            <div class="flex gap-1.5 flex-wrap">
+              <button type="button" onclick="presetForm('headache')" class="text-xs px-2 py-1 bg-white hover:bg-blue-50 text-slate-700 rounded-lg border border-slate-200 font-medium">
+                💻 Laptop Headache
+              </button>
+              <button type="button" onclick="presetForm('cold')" class="text-xs px-2 py-1 bg-white hover:bg-blue-50 text-slate-700 rounded-lg border border-slate-200 font-medium">
+                🍵 Sore Throat
+              </button>
+              <button type="button" onclick="presetForm('emergency')" class="text-xs px-2 py-1 bg-red-50 text-red-700 rounded-lg border border-red-200 font-bold">
+                🚨 Chest Pain Test
+              </button>
+            </div>
+          </div>
+
+          <form onsubmit="handleFormSubmit(event)" class="space-y-3 text-xs">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Main Symptom(s) *</label>
+              <input type="text" id="form-symptom" placeholder="e.g. Dull headache, runny nose" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Duration *</label>
+              <input type="text" id="form-duration" placeholder="e.g. Since this morning, 2 days" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <!-- Severity Slider with live Emoji Face -->
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+              <div class="flex justify-between items-center mb-1.5">
+                <span class="font-semibold text-slate-700">Severity Level:</span>
+                <span id="severity-display" class="font-bold text-blue-700 bg-white px-2 py-0.5 rounded-lg border border-slate-200">
+                  😐 5 / 10 (Moderate)
+                </span>
+              </div>
+              <input type="range" id="form-severity" min="1" max="10" value="5" oninput="updateSeverity(this.value)" class="w-full accent-blue-600 cursor-pointer">
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Relevant Context (Optional)</label>
+              <input type="text" id="form-context" placeholder="e.g. Looked at computer all day, lack of sleep" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <button type="submit" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-xs transition-colors">
+              Analyze Symptoms & Prepare Doctor Summary
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: Doctor Summary & Structured Explanations -->
+      <div class="lg:col-span-4 space-y-4">
+        <!-- Doctor Visit Summary Card -->
+        <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+              <span>📋</span> Doctor-Visit Summary
+            </h3>
+            <button onclick="copySummary()" id="copy-btn" class="text-xs px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-2xs transition-all active:scale-95">
+              Copy Summary
+            </button>
+          </div>
+
+          <div id="summary-content" class="space-y-2 text-xs">
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div class="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                <span class="text-[10px] text-slate-400 font-bold uppercase block">Symptoms</span>
+                <span class="font-semibold text-slate-800 truncate block" id="summary-sym">Dull forehead headache</span>
+              </div>
+              <div class="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                <span class="text-[10px] text-slate-400 font-bold uppercase block">Duration</span>
+                <span class="font-semibold text-slate-800 truncate block" id="summary-dur">Since this morning</span>
+              </div>
+            </div>
+
+            <div class="bg-blue-50/60 p-2.5 rounded-xl border border-blue-100 space-y-1">
+              <span class="text-[10px] font-bold text-blue-900 uppercase">Questions to Ask Your Doctor:</span>
+              <ul class="text-xs text-blue-950 space-y-1 pl-1" id="summary-questions">
+                <li>• Could screen glare or neck posture cause this?</li>
+                <li>• What red flags should prompt earlier checkup?</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Structured Educational Breakdown Card -->
+        <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 space-y-3">
+          <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">
+            💡 Educational Breakdown (Not a Diagnosis)
+          </h3>
+          <div class="space-y-2 text-xs">
+            <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+              <strong class="text-slate-900 block">Possible Common Explanations:</strong>
+              <p class="text-slate-600 mt-0.5" id="breakdown-explanations">
+                Tension from screen use, mild dehydration, or eye fatigue.
+              </p>
+            </div>
+            <div class="p-2.5 rounded-xl bg-emerald-50/60 border border-emerald-100 text-emerald-950">
+              <strong class="block text-emerald-900">Self-Care Comfort Tips:</strong>
+              <span id="breakdown-selfcare">Rest in a dark room, hydrate, take screen breaks.</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-amber-50/60 border border-amber-100 text-amber-950">
+              <strong class="block text-amber-900">Warning Signs:</strong>
+              <span id="breakdown-warnings">Sudden "thunderclap" onset, high fever, or confusion.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Persistent Disclaimer Banner -->
+    <footer class="bg-slate-900 text-slate-300 rounded-2xl py-3 px-4 text-xs text-center border border-slate-800">
+      <span class="font-semibold text-white">Medical Disclaimer:</span>
+      MediMate AI provides general health education only. It is not a doctor and cannot diagnose, prescribe, or treat. In an emergency, immediately call <strong class="text-white underline">112</strong> or <strong class="text-white underline">108</strong>.
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="hidden fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-lg">
+      Summary copied to clipboard!
+    </div>
+  </div>
+
+  <script>
+    const faces = [
+      '😊 1 / 10 (Very Mild)', '🙂 2 / 10 (Mild)', '😐 3 / 10 (Noticeable)',
+      '😕 4 / 10 (Moderate)', '😟 5 / 10 (Moderate)', '😣 6 / 10 (Distressing)',
+      '😖 7 / 10 (Severe)', '😫 8 / 10 (Intense)', '😭 9 / 10 (Very Severe)', '🚨 10 / 10 (Worst)'
+    ];
+
+    function updateSeverity(val) {
+      document.getElementById('severity-display').innerText = faces[val - 1] || `${val} / 10`;
+    }
+
+    function switchTab(tab) {
+      const isChat = tab === 'chat';
+      document.getElementById('view-chat').classList.toggle('hidden', !isChat);
+      document.getElementById('view-form').classList.toggle('hidden', isChat);
+      
+      document.getElementById('tab-btn-chat').className = isChat 
+        ? 'flex-1 py-2 rounded-lg bg-white text-blue-700 shadow-xs text-center transition-all'
+        : 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center transition-all';
+
+      document.getElementById('tab-btn-form').className = !isChat 
+        ? 'flex-1 py-2 rounded-lg bg-white text-blue-700 shadow-xs text-center transition-all'
+        : 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center transition-all';
+    }
+
+    function checkEmergencyText(text) {
+      const lower = text.toLowerCase();
+      const emergencyKeywords = [
+        'chest pain', 'cannot breathe', "can't breathe", 'heart attack', 'stroke',
+        'face droop', 'slurred speech', 'severe bleeding', 'seizure', 'end my life',
+        'suicide', 'poison', 'గుండె నొప్పి', 'శ్వాస ఆడకపోవడం', 'ఆత్మహత్య',
+        'सीने में दर्द', 'सांस लेने में तकलीफ', 'आत्महत्या'
+      ];
+      return emergencyKeywords.some(kw => lower.includes(kw));
+    }
+
+    function showEmergencyBanner(isTelugu, isHindi) {
+      const banner = document.getElementById('emergency-banner');
+      banner.classList.remove('hidden');
+      if (isTelugu) {
+        document.getElementById('emergency-title').innerText = '🚨 తక్షణ అత్యవసర వైద్య పరిస్థితి — వెంటనే ఆసుపత్రికి వెళ్ళండి';
+        document.getElementById('emergency-desc').innerText = 'ఈ లక్షణాలు ప్రాణాంతక పరిస్థితిని సూచించవచ్చు. ఇంట్లో వేచి ఉండకండి. వెంటనే 108 లేదా 112 కు కాల్ చేయండి.';
+      } else if (isHindi) {
+        document.getElementById('emergency-title').innerText = '🚨 गंभीर आपातकालीन स्थिति — तुरंत अस्पताल जाएं';
+        document.getElementById('emergency-desc').innerText = 'ये लक्षण जानलेवा हो सकते हैं। घर पर इंतजार न करें। तुरंत 108 या 112 पर कॉल करें।';
+      } else {
+        document.getElementById('emergency-title').innerText = '🚨 CRITICAL MEDICAL EMERGENCY DETECTED';
+        document.getElementById('emergency-desc').innerText = 'The symptoms described may indicate an acute, life-threatening situation. Seek immediate emergency evaluation.';
+      }
+      banner.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function triggerEmergencyDemo() {
+      showEmergencyBanner(false, false);
+      const container = document.getElementById('messages-container');
+      container.innerHTML += `
+        <div class="flex justify-end">
+          <div class="max-w-[85%] bg-blue-600 text-white rounded-2xl rounded-br-xs px-3.5 py-2.5 text-xs shadow-xs">
+            I have severe chest pain and can't breathe
+          </div>
+        </div>
+        <div class="flex justify-start">
+          <div class="max-w-[85%] bg-red-50 text-red-950 border-2 border-red-300 rounded-2xl rounded-bl-xs px-3.5 py-2.5 text-xs shadow-xs space-y-1">
+            <strong>🚨 EMERGENCY INTERVENTION REQUIRED</strong>
+            <p>Our rule-based safety checker detected emergency warning signs. Do not wait for online messages. Call Ambulance 108 or 112 immediately!</p>
+          </div>
+        </div>
+      `;
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function handleChatSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('chat-input');
+      const val = input.value.trim();
+      if (!val) return;
+      input.value = '';
+
+      const container = document.getElementById('messages-container');
+      container.innerHTML += `
+        <div class="flex justify-end">
+          <div class="max-w-[85%] bg-blue-600 text-white rounded-2xl rounded-br-xs px-3.5 py-2.5 text-xs shadow-xs">
+            ${val}
+          </div>
+        </div>
+      `;
+
+      if (checkEmergencyText(val)) {
+        showEmergencyBanner(false, false);
+        container.innerHTML += `
+          <div class="flex justify-start">
+            <div class="max-w-[85%] bg-red-50 text-red-950 border-2 border-red-300 rounded-2xl rounded-bl-xs px-3.5 py-2.5 text-xs shadow-xs space-y-1">
+              <strong>🚨 EMERGENCY ALERT: Danger Signs Detected</strong>
+              <p>Please call emergency services immediately (Ambulance 108 / Emergency 112). Do not attempt to drive yourself.</p>
+            </div>
+          </div>
+        `;
+      } else {
+        setTimeout(() => {
+          container.innerHTML += `
+            <div class="flex justify-start">
+              <div class="max-w-[85%] bg-slate-100 text-slate-800 rounded-2xl rounded-bl-xs px-3.5 py-2.5 text-xs shadow-xs space-y-1.5">
+                <p>Thank you for asking. Everyday health concerns often relate to hydration, rest, or posture. Keeping track of when this occurs is very helpful when discussing with a doctor.</p>
+                <div class="text-[11px] text-blue-600 font-semibold cursor-pointer" onclick="sendStarter('What questions should I ask my doctor about this?')">
+                  ↳ Suggested: What questions should I ask my doctor about this?
+                </div>
+              </div>
+            </div>
+          `;
+          container.scrollTop = container.scrollHeight;
+        }, 500);
+      }
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function sendStarter(txt) {
+      document.getElementById('chat-input').value = txt;
+      handleChatSubmit({ preventDefault: () => {} });
+    }
+
+    function presetForm(type) {
+      if (type === 'headache') {
+        document.getElementById('form-symptom').value = 'Dull forehead headache and neck stiffness';
+        document.getElementById('form-duration').value = 'Since this morning (about 5 hours)';
+        document.getElementById('form-severity').value = 4;
+        updateSeverity(4);
+        document.getElementById('form-context').value = 'Looked at computer all day with few breaks';
+      } else if (type === 'cold') {
+        document.getElementById('form-symptom').value = 'Scratchy sore throat and runny nose';
+        document.getElementById('form-duration').value = 'Started 2 days ago';
+        document.getElementById('form-severity').value = 3;
+        updateSeverity(3);
+        document.getElementById('form-context').value = 'Seasonal change, family member had a mild cold';
+      } else if (type === 'emergency') {
+        document.getElementById('form-symptom').value = "Severe crushing chest pain and can't breathe";
+        document.getElementById('form-duration').value = 'Started 15 minutes ago';
+        document.getElementById('form-severity').value = 10;
+        updateSeverity(10);
+        document.getElementById('form-context').value = 'Pain radiating to arm';
+      }
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      const sym = document.getElementById('form-symptom').value;
+      const dur = document.getElementById('form-duration').value;
+      const sev = document.getElementById('form-severity').value;
+      const ctx = document.getElementById('form-context').value;
+
+      if (checkEmergencyText(sym)) {
+        showEmergencyBanner(false, false);
+      }
+
+      document.getElementById('summary-sym').innerText = sym;
+      document.getElementById('summary-dur').innerText = dur;
+      document.getElementById('breakdown-explanations').innerText = `Possible factors related to: ${sym}. Discuss with clinician.`;
+      
+      showToast('Symptom analysis & Doctor summary updated!');
+    }
+
+    function copySummary() {
+      const sym = document.getElementById('summary-sym').innerText;
+      const dur = document.getElementById('summary-dur').innerText;
+      const text = `MEDIMATE AI - DOCTOR-VISIT SUMMARY NOTE\nSymptoms: ${sym}\nDuration: ${dur}\nGenerated for clinician visit consultation.`;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Summary copied to clipboard!');
+        const btn = document.getElementById('copy-btn');
+        btn.innerText = 'Copied! ✓';
+        btn.className = 'text-xs px-2.5 py-1 bg-emerald-600 text-white font-semibold rounded-lg shadow-2xs';
+        setTimeout(() => {
+          btn.innerText = 'Copy Summary';
+          btn.className = 'text-xs px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-2xs';
+        }, 2000);
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 2500);
+    }
+
+    function clearSessionData() {
+      if (confirm('Clear current session history?')) {
+        document.getElementById('messages-container').innerHTML = `
+          <div class="text-center py-10 text-slate-400 text-xs">
+            Session cleared. Type a question or choose a starter to begin.
+          </div>
+        `;
+        document.getElementById('emergency-banner').classList.add('hidden');
+        showToast('All local session data cleared.');
+      }
+    }
+
+    function startNewSession() {
+      clearSessionData();
+    }
+
+    function changeLanguage(lang) {
+      const title = document.getElementById('ui-app-title');
+      const tagline = document.getElementById('ui-tagline');
+      const sample = document.getElementById('sample-badge');
+
+      if (lang === 'te') {
+        title.innerText = 'మెడిమేట్ AI (MediMate AI)';
+        tagline.innerText = 'మీ ఆరోగ్య సందేహాలు, సరళమైన వివరణ.';
+        sample.innerText = 'నమూనా సంభాషణ';
+      } else if (lang === 'hi') {
+        title.innerText = 'मेडीमेट एआई (MediMate AI)';
+        tagline.innerText = 'आपके स्वास्थ्य प्रश्न, आसान शब्दों में।';
+        sample.innerText = 'नमूना बातचीत';
+      } else {
+        title.innerText = 'MediMate AI';
+        tagline.innerText = 'Your health questions, explained simply.';
+        sample.innerText = 'Sample conversation';
+      }
+      showToast(`Language switched to ${lang.toUpperCase()}`);
+    }
+  </script>
+</body>
+</html>

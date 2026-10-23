@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: medimate-ai
+    env: node
+    plan: free
+    buildCommand: npm run render-build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: CLIENT_ORIGIN
+        value: https://medimate-ai.onrender.com
+      - key: EMERGENCY_NUMBER_DEFAULT
+        value: 112
+      - key: AMBULANCE_NUMBER_DEFAULT
+        value: 108
+      - key: SUICIDE_HELPLINE_DEFAULT
+        value: 14416

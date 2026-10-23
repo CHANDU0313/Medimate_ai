@@ -1,0 +1,13 @@
+services:
+  medimate:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - NODE_ENV=production
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - EMERGENCY_NUMBER_DEFAULT=112
+      - AMBULANCE_NUMBER_DEFAULT=108
+      - SUICIDE_HELPLINE_DEFAULT=14416
+    restart: unless-stopped
