@@ -21,41 +21,34 @@ import {
   setStoredLanguage,
   SAMPLE_CONVERSATION
 } from '../utils/storage';
-import { MessageSquare, Stethoscope, FileText, History, Check, AlertCircle } from 'lucide-react';
+import { Home, MessageSquare, Stethoscope, FileText, Check } from 'lucide-react';
 
 export default function Dashboard() {
-  // 1. Language State
   const [language, setLanguage] = useState(getStoredLanguage());
   const t = translations[language] || translations.en;
 
-  // 2. Sessions & Chat State
   const [sessions, setSessions] = useState(getSavedSessions());
   const [activeSessionId, setActiveId] = useState(getActiveSessionId());
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [chatError, setChatError] = useState(null);
   const [lastFailedMessage, setLastFailedMessage] = useState(null);
 
-  // 3. Symptom Checker & Results State
   const [symptomResult, setSymptomResult] = useState(null);
   const [doctorSummary, setDoctorSummary] = useState(null);
   const [isSymptomLoading, setIsSymptomLoading] = useState(false);
 
-  // 4. Urgency & Emergency Alert State
-  const [currentUrgency, setCurrentUrgency] = useState(null); // 'emergency' | 'urgent' | 'routine' | null
+  const [currentUrgency, setCurrentUrgency] = useState(null);
   const [emergencyPayload, setEmergencyPayload] = useState(null);
 
-  // 5. System & API Health State
   const [isLiveAI, setIsLiveAI] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(true);
 
-  // 6. Navigation Tabs (Mobile & Tablet)
-  const [activeTab, setActiveTab] = useState('chat'); // 'chat' | 'symptoms' | 'summary' | 'history'
+  // Tab State: 'chat' | 'symptoms' | 'summary'
+  const [activeTab, setActiveTab] = useState('chat');
 
-  // 7. Modals and Toasts
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(!hasGivenConsent());
   const [toastMessage, setToastMessage] = useState(null);
 
-  // Load API Health status on mount
   useEffect(() => {
     fetch('/api/health')
       .then(res => res.json())
@@ -64,41 +57,35 @@ export default function Dashboard() {
         setIsDemoMode(data.demoMode);
       })
       .catch(() => {
-        // Fallback to demo mode if backend is starting or offline
         setIsLiveAI(false);
         setIsDemoMode(true);
       });
   }, []);
 
-  // Update language and persist
   const handleLanguageChange = (newLang) => {
     setLanguage(newLang);
     setStoredLanguage(newLang);
   };
 
-  // Find active session
   const currentSession = sessions.find(s => s.id === activeSessionId) || sessions[0] || SAMPLE_CONVERSATION;
 
-  // Show Toast
   const triggerToast = (msg) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  // Switch Conversation Session
   const handleSelectSession = (id) => {
     setActiveId(id);
     setActiveSessionId(id);
     setActiveTab('chat');
   };
 
-  // Create New Conversation Session
   const handleNewSession = () => {
     const newId = `session_${Date.now()}`;
     const newSession = {
       id: newId,
       isSample: false,
-      title: 'New Health Checkup',
+      title: 'New Health Chat',
       createdAt: new Date().toISOString(),
       messages: []
     };
@@ -112,9 +99,8 @@ export default function Dashboard() {
     setActiveTab('chat');
   };
 
-  // Clear Session Data
   const handleClearData = () => {
-    if (window.confirm(t?.app?.clearDataConfirm || 'Are you sure you want to clear your current session data?')) {
+    if (window.confirm('Clear all session data from your browser?')) {
       clearAllSessionData();
       setSessions([SAMPLE_CONVERSATION]);
       setActiveId(SAMPLE_CONVERSATION.id);
@@ -123,11 +109,10 @@ export default function Dashboard() {
       setDoctorSummary(null);
       setCurrentUrgency(null);
       setEmergencyPayload(null);
-      triggerToast(t?.app?.dataClearedToast || 'All session data cleared securely.');
+      triggerToast('All local session data has been cleared.');
     }
   };
 
-  // Send Chat Message
   const handleSendMessage = async (content) => {
     if (!content.trim()) return;
 
@@ -141,13 +126,12 @@ export default function Dashboard() {
       timestamp: new Date().toISOString()
     };
 
-    // Optimistic UI update
     const updatedMessages = [...currentSession.messages, userMessage];
     const updatedSessions = sessions.map(s => {
       if (s.id === currentSession.id) {
         return {
           ...s,
-          title: s.title === 'New Health Checkup' ? content.slice(0, 35) + '...' : s.title,
+          title: s.title === 'New Health Chat' ? content.slice(0, 30) + '...' : s.title,
           messages: updatedMessages
         };
       }
@@ -170,12 +154,11 @@ export default function Dashboard() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || t?.chat?.errorNetwork || 'Request failed');
+        throw new Error(errorData.error || 'Request failed');
       }
 
       const data = await response.json();
 
-      // Handle Urgency Guidance
       if (data.urgency) {
         setCurrentUrgency(data.urgency);
       }
@@ -205,33 +188,15 @@ export default function Dashboard() {
       setSessions(finalSessions);
       saveSessions(finalSessions);
 
-      // Auto-update doctor summary if user asked health questions
-      if (!doctorSummary) {
-        setDoctorSummary({
-          symptoms: content,
-          duration: 'Reported in chat',
-          severity: 'Moderate',
-          patientAgeRange: 'Adult',
-          context: 'Discussed via AI Health Chat',
-          urgency: data.urgency === 'emergency' ? 'EMERGENCY' : 'Self-Care & Routine Checkup',
-          suggestedQuestionsForDoctor: data.suggestedFollowUps || [
-            'What might be causing this discomfort?',
-            'What symptoms indicate I should follow up?'
-          ],
-          summaryOverview: data.reply.slice(0, 250) + '...'
-        });
-      }
-
     } catch (err) {
       console.error('Chat error:', err);
-      setChatError(err.message || t?.chat?.errorNetwork || 'Network error');
+      setChatError(err.message || 'Network error');
       setLastFailedMessage(content);
     } finally {
       setIsChatLoading(false);
     }
   };
 
-  // Submit Symptom Form
   const handleSymptomSubmit = async (formData) => {
     setIsSymptomLoading(true);
     setCurrentUrgency(null);
@@ -265,23 +230,19 @@ export default function Dashboard() {
         setCurrentUrgency('emergency');
       }
 
-      // Switch view on mobile to show results
-      if (window.innerWidth < 1024) {
-        setActiveTab('summary');
-      }
-
       triggerToast('Symptom analysis & Doctor summary ready!');
     } catch (err) {
       console.error('Symptom error:', err);
-      alert(err.message || 'Error analyzing symptoms. Please try again.');
+      alert(err.message || 'Error analyzing symptoms.');
     } finally {
       setIsSymptomLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-      {/* Top Navigation */}
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans pb-16 lg:pb-0">
+      
+      {/* Top Navigation Bar matching Mockup */}
       <Navbar
         currentLanguage={language}
         onLanguageChange={handleLanguageChange}
@@ -292,10 +253,11 @@ export default function Dashboard() {
         t={t}
       />
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
-        {/* Full-Width Urgency Alert (prominent red for emergencies) */}
-        {currentUrgency && (
+      {/* Main 3-Column Dashboard matching Mockup */}
+      <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-5 lg:p-6 space-y-4">
+        
+        {/* Full-width Emergency Red Alert */}
+        {currentUrgency === 'emergency' && (
           <UrgencyAlert
             urgency={currentUrgency}
             emergencyPayload={emergencyPayload}
@@ -304,102 +266,24 @@ export default function Dashboard() {
           />
         )}
 
-        {/* Mobile / Tablet Tab Selector */}
-        <div className="lg:hidden flex items-center bg-slate-200/80 p-1.5 rounded-2xl gap-1 text-xs font-semibold">
-          <button
-            onClick={() => setActiveTab('chat')}
-            className={`flex-1 py-2 rounded-xl flex items-center justify-center gap-1.5 transition-all ${
-              activeTab === 'chat'
-                ? 'bg-white text-brand-700 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <MessageSquare className="w-3.5 h-3.5" />
-            <span>{t?.nav?.chatTab || 'Chat'}</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('symptoms')}
-            className={`flex-1 py-2 rounded-xl flex items-center justify-center gap-1.5 transition-all ${
-              activeTab === 'symptoms'
-                ? 'bg-white text-brand-700 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <Stethoscope className="w-3.5 h-3.5" />
-            <span>{t?.nav?.symptomTab || 'Form'}</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('summary')}
-            className={`flex-1 py-2 rounded-xl flex items-center justify-center gap-1.5 transition-all ${
-              activeTab === 'summary'
-                ? 'bg-white text-brand-700 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <FileText className="w-3.5 h-3.5" />
-            <span>{t?.nav?.summaryTab || 'Summary'}</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('history')}
-            className={`flex-1 py-2 rounded-xl flex items-center justify-center gap-1.5 transition-all ${
-              activeTab === 'history'
-                ? 'bg-white text-brand-700 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <History className="w-3.5 h-3.5" />
-            <span>{t?.nav?.historyTab || 'History'}</span>
-          </button>
-        </div>
-
-        {/* DESKTOP 3-COLUMN DASHBOARD */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* COLUMN 1 (Desktop Left, 3 cols): Recent Conversations Panel */}
-          <div className={`lg:col-span-3 ${activeTab === 'history' ? 'block' : 'hidden lg:block'}`}>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          
+          {/* COLUMN 1 (Desktop Left, 3 cols): Navigation Sidebar matching Mockup */}
+          <div className="hidden lg:block lg:col-span-3">
             <RecentConversations
               sessions={sessions}
               activeSessionId={activeSessionId}
               onSelectSession={handleSelectSession}
               onNewSession={handleNewSession}
+              onNavigateTab={(tab) => setActiveTab(tab)}
+              onClearData={handleClearData}
+              activeTab={activeTab}
               t={t}
             />
           </div>
 
-          {/* COLUMN 2 (Center, 5 cols): Main Chat or Symptom Checker */}
-          <div className={`lg:col-span-5 space-y-6 ${
-            activeTab === 'chat' || activeTab === 'symptoms' ? 'block' : 'hidden lg:block'
-          }`}>
-            {/* Center Tab Toggle between Chat and Symptom Form */}
-            <div className="hidden lg:flex items-center bg-slate-200/80 p-1 rounded-2xl gap-1 text-xs font-semibold">
-              <button
-                onClick={() => setActiveTab('chat')}
-                className={`flex-1 py-2 rounded-xl flex items-center justify-center gap-2 transition-all ${
-                  activeTab === 'chat'
-                    ? 'bg-white text-brand-700 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <MessageSquare className="w-4 h-4" />
-                <span>{t?.nav?.chatTab || 'AI Health Chat'}</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('symptoms')}
-                className={`flex-1 py-2 rounded-xl flex items-center justify-center gap-2 transition-all ${
-                  activeTab === 'symptoms'
-                    ? 'bg-white text-brand-700 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <Stethoscope className="w-4 h-4" />
-                <span>{t?.nav?.symptomTab || 'Symptom Information Form'}</span>
-              </button>
-            </div>
-
-            {/* Render Chat or Symptom Form */}
+          {/* COLUMN 2 (Center, 5 cols): Chat Window OR Symptom Form */}
+          <div className="lg:col-span-5 space-y-4">
             {activeTab === 'symptoms' ? (
               <SymptomForm
                 onSubmit={handleSymptomSubmit}
@@ -421,9 +305,8 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* COLUMN 3 (Desktop Right, 4 cols): Doctor-Visit Summary & Symptom Results */}
-          <div className={`lg:col-span-4 space-y-6 ${activeTab === 'summary' ? 'block' : 'hidden lg:block'}`}>
-            {/* Doctor-Visit Summary Card with Copy to Clipboard */}
+          {/* COLUMN 3 (Desktop Right, 4 cols): Doctor Summary + Symptom Results */}
+          <div className="lg:col-span-4 space-y-4">
             <DoctorSummaryCard
               summary={doctorSummary}
               onToast={triggerToast}
@@ -431,19 +314,67 @@ export default function Dashboard() {
               language={language}
             />
 
-            {/* Educational Symptom Result Card */}
             <SymptomResultCard
               result={symptomResult}
               t={t}
             />
           </div>
+
         </div>
       </main>
 
-      {/* Persistent Disclaimer Banner */}
+      {/* Persistent Medical Disclaimer Banner */}
       <DisclaimerBanner text={t?.app?.disclaimer} />
 
-      {/* First-load Privacy & Consent Modal */}
+      {/* Mobile Bottom Navigation Bar matching Mobile Screens 1-4 */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 flex items-center justify-around py-2 px-3 shadow-lg">
+        <button
+          onClick={() => {
+            handleNewSession();
+            setActiveTab('chat');
+          }}
+          className={`flex flex-col items-center gap-1 text-[11px] font-semibold ${
+            activeTab === 'chat' && currentSession.messages.length === 0
+              ? 'text-brand-600'
+              : 'text-slate-500'
+          }`}
+        >
+          <Home className="w-4 h-4" />
+          <span>Home</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('chat')}
+          className={`flex flex-col items-center gap-1 text-[11px] font-semibold ${
+            activeTab === 'chat' ? 'text-brand-600' : 'text-slate-500'
+          }`}
+        >
+          <MessageSquare className="w-4 h-4" />
+          <span>Chat</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('symptoms')}
+          className={`flex flex-col items-center gap-1 text-[11px] font-semibold ${
+            activeTab === 'symptoms' ? 'text-brand-600' : 'text-slate-500'
+          }`}
+        >
+          <Stethoscope className="w-4 h-4" />
+          <span>Symptom</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('summary')}
+          className={`flex flex-col items-center gap-1 text-[11px] font-semibold ${
+            activeTab === 'summary' ? 'text-brand-600' : 'text-slate-500'
+          }`}
+        >
+          <FileText className="w-4 h-4" />
+          <span>Summary</span>
+        </button>
+      </nav>
+
+      {/* Privacy / Consent Modal matching Mobile Screen 6 */}
       <PrivacyModal
         isOpen={isPrivacyOpen}
         onClose={() => setIsPrivacyOpen(false)}
@@ -455,11 +386,11 @@ export default function Dashboard() {
         t={t}
       />
 
-      {/* Success Toast */}
+      {/* Toast Notification */}
       {toastMessage && (
         <div 
           role="status"
-          className="fixed bottom-14 right-5 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-2xl shadow-xl flex items-center gap-2 text-xs sm:text-sm font-medium animate-in slide-in-from-bottom-2 fade-in duration-200"
+          className="fixed bottom-20 right-5 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 text-xs font-semibold animate-in fade-in duration-200"
         >
           <Check className="w-4 h-4 text-emerald-400" />
           <span>{toastMessage}</span>

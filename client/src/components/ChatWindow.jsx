@@ -1,6 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Sparkles, AlertCircle, RefreshCw, HelpCircle, ShieldAlert } from 'lucide-react';
+import { ArrowRight, Bot, Sparkles, AlertCircle, RefreshCw, ShieldAlert } from 'lucide-react';
 import { formatTime } from '../utils/formatters';
+
+const DEFAULT_STARTERS = [
+  "What causes a headache?",
+  "How to improve sleep?",
+  "Is a sore throat serious?",
+  "Healthy diet tips"
+];
 
 export default function ChatWindow({
   messages,
@@ -14,14 +21,9 @@ export default function ChatWindow({
 }) {
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef(null);
-  const inputRef = useRef(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
 
   useEffect(() => {
-    scrollToBottom();
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
   const handleSubmit = (e) => {
@@ -36,57 +38,47 @@ export default function ChatWindow({
     onSendMessage(question);
   };
 
-  const starters = t?.chat?.starters || [
-    "I've had a headache since this morning after working on screens.",
-    "How can I tell the difference between a cold and seasonal allergies?",
-    "What are simple, safe ways to soothe a sore throat at home?",
-    "Why do my knees feel stiff in the morning when I wake up?"
-  ];
+  const starters = (t?.chat?.starters && t.chat.starters.length > 0) ? t.chat.starters : DEFAULT_STARTERS;
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-200/90 shadow-card flex flex-col h-[650px] sm:h-[720px] overflow-hidden transition-all">
-      {/* Chat Window Header */}
-      <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/70 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-2xl bg-brand-600 text-white flex items-center justify-center shadow-xs">
-            <Bot className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-sm sm:text-base font-bold text-slate-900">
-                {t?.chat?.title || 'AI Health Chat'}
-              </h2>
-              {isSample && (
-                <span className="px-2 py-0.5 bg-blue-100 text-brand-700 text-[10px] font-semibold rounded-full border border-blue-200">
-                  {t?.chat?.sampleBadge || 'Sample conversation'}
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-slate-500 hidden sm:block">
-              {t?.chat?.subtitle || 'Plain language health education. Not a clinical diagnosis.'}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="font-medium">Active Assistant</span>
-        </div>
-      </div>
-
+    <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm flex flex-col h-[650px] overflow-hidden transition-all">
+      
       {/* Messages Scroll Area */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
         {messages.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400">
-            <Bot className="w-12 h-12 text-brand-300 mb-3" />
-            <h3 className="text-base font-bold text-slate-700">
-              {t?.chat?.emptyTitle || 'Welcome to MediMate AI'}
+          /* EMPTY STATE (Matching Screen 1 of Mockup) */
+          <div className="h-full flex flex-col justify-center items-center text-center p-4 sm:p-6 max-w-lg mx-auto">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-1">
+              Hello! 👋
+            </h2>
+            <h3 className="text-xl sm:text-2xl font-bold text-slate-800 mb-2">
+              How can I help you today?
             </h3>
-            <p className="text-xs max-w-sm mt-1 text-slate-500">
-              {t?.chat?.emptyDesc || 'Choose a starter question below or ask about any everyday health topic.'}
+            <p className="text-xs sm:text-sm text-slate-500 mb-6 leading-relaxed">
+              Ask health questions, check symptoms, or get health education in simple language.
             </p>
+
+            {/* Example questions */}
+            <div className="w-full space-y-2">
+              <span className="text-xs font-semibold text-slate-400 block mb-2">
+                Try these example questions:
+              </span>
+              <div className="flex flex-wrap justify-center gap-2">
+                {DEFAULT_STARTERS.map((starter, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleStarterClick(starter)}
+                    className="text-xs px-3.5 py-2 bg-blue-50/70 hover:bg-blue-100 text-brand-700 font-semibold rounded-xl border border-blue-200/80 transition-all shadow-2xs hover:scale-102"
+                  >
+                    {starter}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         ) : (
+          /* ACTIVE CONVERSATION (Matching Screen 2 of Mockup) */
           messages.map((msg, index) => {
             const isUser = msg.role === 'user';
             const isEmergencyMsg = msg.urgency === 'emergency' || msg.emergency;
@@ -94,34 +86,25 @@ export default function ChatWindow({
             return (
               <div
                 key={msg.id || index}
-                className={`flex gap-3 ${isUser ? 'justify-end' : 'justify-start'} animate-in fade-in duration-150`}
+                className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} animate-in fade-in duration-150`}
               >
-                {!isUser && (
-                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-1 shadow-2xs ${
-                    isEmergencyMsg ? 'bg-red-600 text-white' : 'bg-brand-50 text-brand-600'
-                  }`}>
-                    {isEmergencyMsg ? <ShieldAlert className="w-4 h-4 text-white" /> : <Bot className="w-4 h-4" />}
-                  </div>
-                )}
-
                 <div
-                  className={`max-w-[85%] sm:max-w-[78%] rounded-2xl px-4 py-3 text-xs sm:text-sm leading-relaxed shadow-2xs ${
+                  className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-4 py-3 text-xs sm:text-sm leading-relaxed shadow-2xs ${
                     isUser
-                      ? 'bg-brand-600 text-white rounded-br-xs'
+                      ? 'bg-brand-600 text-white rounded-br-xs font-medium'
                       : isEmergencyMsg
                       ? 'bg-red-50 text-red-950 border-2 border-red-300 rounded-bl-xs'
-                      : 'bg-slate-100 text-slate-800 rounded-bl-xs'
+                      : 'bg-white text-slate-800 border border-slate-200/80 rounded-bl-xs'
                   }`}
                 >
-                  {/* Message Content */}
-                  <div className="whitespace-pre-line font-normal">
+                  <div className="whitespace-pre-line">
                     {msg.content}
                   </div>
 
-                  {/* Suggested Follow-ups if provided */}
+                  {/* Follow-up question chips */}
                   {!isUser && msg.suggestedFollowUps && msg.suggestedFollowUps.length > 0 && (
-                    <div className="mt-3 pt-2.5 border-t border-slate-200/70 space-y-1.5">
-                      <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider block">
+                    <div className="mt-3 pt-2.5 border-t border-slate-100 space-y-1">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block">
                         Related Topics:
                       </span>
                       <div className="flex flex-wrap gap-1">
@@ -129,7 +112,7 @@ export default function ChatWindow({
                           <button
                             key={sIdx}
                             onClick={() => handleStarterClick(suggested)}
-                            className="text-[11px] px-2.5 py-1 bg-white hover:bg-brand-50 text-brand-700 font-medium rounded-lg border border-slate-200 transition-colors text-left"
+                            className="text-[11px] px-2.5 py-1 bg-slate-50 hover:bg-blue-50 text-brand-700 font-medium rounded-lg border border-slate-200 transition-colors"
                           >
                             ↳ {suggested}
                           </button>
@@ -137,31 +120,22 @@ export default function ChatWindow({
                       </div>
                     </div>
                   )}
-
-                  {/* Timestamp */}
-                  <div className={`text-[10px] mt-1.5 text-right ${isUser ? 'text-blue-100' : 'text-slate-400'}`}>
-                    {formatTime(msg.timestamp || new Date().toISOString())}
-                  </div>
                 </div>
 
-                {isUser && (
-                  <div className="w-8 h-8 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center shrink-0 mt-1 shadow-2xs">
-                    <User className="w-4 h-4" />
-                  </div>
-                )}
+                {/* Message Timestamp */}
+                <span className="text-[10px] text-slate-400 mt-1 px-1">
+                  {formatTime(msg.timestamp || new Date().toISOString()) || '10:24 AM'}
+                </span>
               </div>
             );
           })
         )}
 
-        {/* Typing Loading Indicator Skeleton */}
+        {/* Loading Indicator */}
         {isLoading && (
-          <div className="flex gap-3 justify-start items-center">
-            <div className="w-8 h-8 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0">
-              <Bot className="w-4 h-4" />
-            </div>
-            <div className="bg-slate-100 text-slate-600 rounded-2xl rounded-bl-xs px-4 py-3 text-xs flex items-center gap-2">
-              <span className="font-medium">{t?.chat?.thinking || 'MediMate is thinking'}</span>
+          <div className="flex flex-col items-start">
+            <div className="bg-white border border-slate-200 text-slate-600 rounded-2xl rounded-bl-xs px-4 py-3 text-xs flex items-center gap-2 shadow-2xs">
+              <span className="font-medium">MediMate is writing</span>
               <div className="flex gap-1">
                 <span className="w-1.5 h-1.5 bg-brand-600 rounded-full animate-bounce [animation-delay:-0.3s]" />
                 <span className="w-1.5 h-1.5 bg-brand-600 rounded-full animate-bounce [animation-delay:-0.15s]" />
@@ -171,20 +145,19 @@ export default function ChatWindow({
           </div>
         )}
 
-        {/* Error and Retry State */}
+        {/* Error message */}
         {error && (
-          <div className="p-3.5 bg-red-50 border border-red-200 rounded-2xl text-xs text-red-700 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
+          <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
             {onRetry && (
               <button
                 onClick={onRetry}
-                className="inline-flex items-center gap-1 px-2.5 py-1 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shrink-0 transition-colors"
+                className="px-2 py-1 bg-red-600 text-white rounded-lg font-bold text-xs"
               >
-                <RefreshCw className="w-3 h-3" />
-                {t?.chat?.retry || 'Retry'}
+                Retry
               </button>
             )}
           </div>
@@ -193,47 +166,30 @@ export default function ChatWindow({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Suggested Starter Chips */}
-      <div className="p-3 bg-slate-50/80 border-t border-slate-100">
-        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2">
-          <HelpCircle className="w-3.5 h-3.5 text-brand-500" />
-          <span>{t?.chat?.suggestedStartersTitle || 'Suggested starter questions:'}</span>
-        </div>
-        <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-          {starters.map((starter, idx) => (
-            <button
-              key={idx}
-              type="button"
-              disabled={isLoading}
-              onClick={() => handleStarterClick(starter)}
-              className="text-xs px-3 py-1.5 bg-white hover:bg-brand-50 hover:text-brand-700 hover:border-brand-300 text-slate-700 font-medium rounded-xl border border-slate-200 shadow-2xs whitespace-nowrap transition-all active:scale-95 disabled:opacity-50"
-            >
-              {starter}
-            </button>
-          ))}
-        </div>
+      {/* Persistent Disclaimer Subtext */}
+      <div className="px-4 py-1.5 bg-slate-50 border-t border-slate-100 text-[11px] text-slate-400 text-center">
+        MediMate AI provides general health information only. It is not a doctor and cannot diagnose or treat.
       </div>
 
-      {/* Chat Input Bar */}
+      {/* Input Bar with Circular Send Button matching Mockup */}
       <form onSubmit={handleSubmit} className="p-3 sm:p-4 bg-white border-t border-slate-100 flex items-center gap-2">
         <input
-          ref={inputRef}
           type="text"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          placeholder={t?.chat?.placeholder || 'Type your health question in plain language...'}
+          placeholder="Type your health question..."
           disabled={isLoading}
           maxLength={1500}
-          className="flex-1 px-4 py-2.5 sm:py-3 bg-slate-50 focus:bg-white text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
+          className="flex-1 px-4 py-2.5 sm:py-3 bg-slate-50 focus:bg-white text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
         />
 
         <button
           type="submit"
           disabled={!inputValue.trim() || isLoading}
-          className="p-2.5 sm:p-3 bg-brand-600 hover:bg-brand-700 disabled:bg-slate-200 disabled:text-slate-400 text-white rounded-2xl shadow-sm transition-all active:scale-95 flex items-center justify-center shrink-0"
-          aria-label={t?.chat?.send || 'Send message'}
+          className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-brand-600 hover:bg-brand-700 disabled:bg-slate-200 disabled:text-slate-400 text-white shadow-sm flex items-center justify-center shrink-0 transition-transform active:scale-95"
+          aria-label="Send message"
         >
-          <Send className="w-4 h-4 sm:w-5 sm:h-5" />
+          <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
       </form>
     </div>
