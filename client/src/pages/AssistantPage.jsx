@@ -1,7 +1,26 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, Mic, MicOff, Volume2, Square, AlertCircle, ExternalLink, ShieldAlert, Sparkles, PhoneCall, PlusCircle, RefreshCw } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
-import { getSavedSessions, saveSessions, getActiveSessionId, setActiveSessionId, SAMPLE_CONVERSATION } from '../utils/storage';
+import { getSavedSessions, saveSessions, getActiveSessionId, setActiveSessionId, SAMPLE_CONVERSATION, TELUGU_SAMPLE_CONVERSATION } from '../utils/storage';
+
+function loadSpeechVoices(synthesis) {
+  const voices = synthesis.getVoices();
+  if (voices.length || typeof synthesis.addEventListener !== 'function') {
+    return Promise.resolve(voices);
+  }
+
+  return new Promise((resolve) => {
+    let timeoutId;
+    const finish = () => {
+      window.clearTimeout(timeoutId);
+      synthesis.removeEventListener('voiceschanged', finish);
+      resolve(synthesis.getVoices());
+    };
+
+    synthesis.addEventListener('voiceschanged', finish);
+    timeoutId = window.setTimeout(finish, 1200);
+  });
+}
 
 export default function AssistantPage() {
   const { language, t } = useLanguage();
@@ -19,10 +38,21 @@ export default function AssistantPage() {
   const [isListening, setIsListening] = useState(false);
   const [speechError, setSpeechError] = useState(null);
   const recognitionRef = useRef(null);
+  const speechRequestRef = useRef(0);
 
   const messagesEndRef = useRef(null);
 
-  const currentSession = sessions.find(s => s.id === activeSessionId) || sessions[0] || SAMPLE_CONVERSATION;
+  const storedSession = sessions.find(s => s.id === activeSessionId) || sessions[0] || SAMPLE_CONVERSATION;
+  const currentSession = storedSession.isSample && isTelugu
+    ? {
+      ...storedSession,
+      ...TELUGU_SAMPLE_CONVERSATION,
+      messages: [
+        ...TELUGU_SAMPLE_CONVERSATION.messages,
+        ...storedSession.messages.slice(SAMPLE_CONVERSATION.messages.length)
+      ]
+    }
+    : storedSession;
 
   const suggestedStarters = isTelugu ? [
     'ఉదయం నుండి తలనొప్పిగా ఉంది, సాధారణ కారణాలు ఏమిటి?',
@@ -50,8 +80,16 @@ export default function AssistantPage() {
   }, [currentSession.messages, isLoading]);
 
   useEffect(() => {
+    speechRequestRef.current += 1;
+    window.speechSynthesis?.cancel();
+    setSpeakingMessageId(null);
+    setSpeechError(null);
+  }, [language]);
+
+  useEffect(() => {
     return () => {
       if (window.speechSynthesis) {
+        speechRequestRef.current += 1;
         window.speechSynthesis.cancel();
       }
       if (recognitionRef.current) {
@@ -158,38 +196,77 @@ export default function AssistantPage() {
     }
   };
 
-  const handleToggleSpeak = (msgId, text) => {
-    if (!('speechSynthesis' in window)) {
-      alert(isTelugu ? 'మీ బ్రౌజర్‌లో వాయిస్ సదుపాయం లేదు.' : 'Speech synthesis is not supported in this browser.');
+  const handleToggleSpeak = async (msgId, text) => {
+    if (!window.speechSynthesis || typeof window.SpeechSynthesisUtterance !== 'function') {
+      setSpeechError(c.speechPlaybackError);
       return;
     }
 
     if (speakingMessageId === msgId) {
+      speechRequestRef.current += 1;
       window.speechSynthesis.cancel();
       setSpeakingMessageId(null);
       return;
     }
 
+    const requestId = ++speechRequestRef.current;
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = isTelugu ? 'te-IN' : 'en-IN';
-    utterance.rate = 0.95;
-
-    utterance.onend = () => setSpeakingMessageId(null);
-    utterance.onerror = () => setSpeakingMessageId(null);
-
+    setSpeechError(null);
     setSpeakingMessageId(msgId);
-    window.speechSynthesis.speak(utterance);
+
+    let voices;
+    try {
+      voices = await loadSpeechVoices(window.speechSynthesis);
+    } catch (error) {
+      console.error('Speech voice lookup failed:', error);
+      if (requestId === speechRequestRef.current) {
+        setSpeakingMessageId(null);
+        setSpeechError(c.speechPlaybackError);
+      }
+      return;
+    }
+
+    if (requestId !== speechRequestRef.current) return;
+
+    const locale = isTelugu ? 'te-IN' : 'en-IN';
+    const matchingVoice = voices.find(voice => voice.lang.toLowerCase() === locale.toLowerCase())
+      || voices.find(voice => voice.lang.toLowerCase() === locale.slice(0, 2).toLowerCase())
+      || voices.find(voice => voice.lang.toLowerCase().startsWith(`${locale.slice(0, 2).toLowerCase()}-`));
+
+    if (isTelugu && !matchingVoice) {
+      setSpeakingMessageId(null);
+      setSpeechError(c.speechVoiceUnavailable);
+      return;
+    }
+
+    const utterance = new window.SpeechSynthesisUtterance(text);
+    utterance.lang = locale;
+    utterance.rate = 0.95;
+    if (matchingVoice) utterance.voice = matchingVoice;
+
+    utterance.onend = () => {
+      if (requestId === speechRequestRef.current) setSpeakingMessageId(null);
+    };
+    utterance.onerror = () => {
+      if (requestId === speechRequestRef.current) {
+        setSpeakingMessageId(null);
+        setSpeechError(c.speechPlaybackError);
+      }
+    };
+
+    try {
+      window.speechSynthesis.speak(utterance);
+    } catch (error) {
+      console.error('Speech playback failed:', error);
+      setSpeakingMessageId(null);
+      setSpeechError(c.speechPlaybackError);
+    }
   };
 
   const handleToggleMic = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      setSpeechError(
-        isTelugu
-          ? 'మీ బ్రౌజర్ వాయిస్ రికగ్నిషన్‌కు మద్దతు ఇవ్వదు (Chrome లేదా Edge ఉపయోగించండి).'
-          : 'Voice input is not supported in this browser (Chrome or Edge recommended).'
-      );
+      setSpeechError(c.micUnsupported);
       return;
     }
 
@@ -217,6 +294,7 @@ export default function AssistantPage() {
       recognition.onerror = (e) => {
         console.warn('Speech recognition error:', e.error);
         setIsListening(false);
+        setSpeechError(c.micRecognitionError);
       };
 
       recognition.onend = () => setIsListening(false);
@@ -226,6 +304,7 @@ export default function AssistantPage() {
     } catch (e) {
       console.error('Speech start failed:', e);
       setIsListening(false);
+      setSpeechError(c.micRecognitionError);
     }
   };
 
@@ -415,6 +494,11 @@ export default function AssistantPage() {
             <p className="text-[11px] text-slate-500 leading-tight">
               {c.micDisclaimer}
             </p>
+            {speechError && (
+              <p role="alert" className="text-xs text-rose-700">
+                {speechError}
+              </p>
+            )}
           </div>
 
         </div>
