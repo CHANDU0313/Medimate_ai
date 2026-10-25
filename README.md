@@ -78,12 +78,15 @@ npm test
 ```
 *Executes all 28 automated tests (18 safety check tests + 10 API integration tests).*
 
-### 4. Build for Production
+### 4. Build & Run as One Unified Full-Stack Website (Single URL)
+MediMate AI combines both the React frontend and Express backend into a single integrated server on port 5000:
 ```bash
-npm run build
+npm run serve
+# Or: npm run build && npm start
 ```
+Open **[http://localhost:5000](http://localhost:5000)** in your browser to access the complete application!
 
-### 5. Start Development Servers
+### 5. Development Mode (Hot-Reloading)
 ```bash
 npm run dev
 ```
