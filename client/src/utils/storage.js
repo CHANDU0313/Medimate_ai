@@ -7,7 +7,8 @@ const STORAGE_KEYS = {
   SESSIONS: 'medimate_sessions_v1',
   ACTIVE_SESSION_ID: 'medimate_active_session_id',
   LANGUAGE: 'medimate_selected_lang',
-  CONSENT_GIVEN: 'medimate_consent_agreed'
+  CONSENT_GIVEN: 'medimate_consent_agreed',
+  SPEECH_VOICES: 'medimate_speech_voices_v1'
 };
 
 const SAMPLE_SESSION_ID = 'session_sample_demo_1';
@@ -177,5 +178,27 @@ export function setStoredLanguage(lang) {
     sessionStorage.setItem(STORAGE_KEYS.LANGUAGE, lang);
   } catch (e) {
     console.warn('Language save failed:', e);
+  }
+}
+
+export function getSpeechVoiceSettings() {
+  try {
+    const settings = JSON.parse(sessionStorage.getItem(STORAGE_KEYS.SPEECH_VOICES) || '{}');
+    return {
+      gender: settings.gender === 'male' ? 'male' : 'female',
+      femaleVoiceURI: typeof settings.femaleVoiceURI === 'string' ? settings.femaleVoiceURI : '',
+      maleVoiceURI: typeof settings.maleVoiceURI === 'string' ? settings.maleVoiceURI : ''
+    };
+  } catch (e) {
+    console.warn('Speech voice settings read error:', e);
+    return { gender: 'female', femaleVoiceURI: '', maleVoiceURI: '' };
+  }
+}
+
+export function setSpeechVoiceSettings(settings) {
+  try {
+    sessionStorage.setItem(STORAGE_KEYS.SPEECH_VOICES, JSON.stringify(settings));
+  } catch (e) {
+    console.warn('Speech voice settings save failed:', e);
   }
 }

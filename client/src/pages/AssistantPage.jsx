@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, Mic, MicOff, Volume2, Square, AlertCircle, ExternalLink, ShieldAlert, Sparkles, PhoneCall, PlusCircle, RefreshCw } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
-import { getSavedSessions, saveSessions, getActiveSessionId, setActiveSessionId, SAMPLE_CONVERSATION, TELUGU_SAMPLE_CONVERSATION } from '../utils/storage';
+import { getSavedSessions, saveSessions, getActiveSessionId, setActiveSessionId, getSpeechVoiceSettings, setSpeechVoiceSettings, SAMPLE_CONVERSATION, TELUGU_SAMPLE_CONVERSATION } from '../utils/storage';
 
 function loadSpeechVoices(synthesis) {
   const voices = synthesis.getVoices();
@@ -33,6 +33,8 @@ export default function AssistantPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isLiveAI, setIsLiveAI] = useState(false);
   const [speakingMessageId, setSpeakingMessageId] = useState(null);
+  const [teluguVoices, setTeluguVoices] = useState([]);
+  const [speechVoiceSettings, setSpeechVoiceSettingsState] = useState(() => getSpeechVoiceSettings());
   
   // Speech recognition state
   const [isListening, setIsListening] = useState(false);
@@ -80,6 +82,21 @@ export default function AssistantPage() {
   }, [currentSession.messages, isLoading]);
 
   useEffect(() => {
+    const synthesis = window.speechSynthesis;
+    if (!synthesis) return undefined;
+
+    const updateTeluguVoices = () => {
+      setTeluguVoices(
+        synthesis.getVoices().filter(voice => voice.lang.toLowerCase().startsWith('te'))
+      );
+    };
+
+    updateTeluguVoices();
+    synthesis.addEventListener('voiceschanged', updateTeluguVoices);
+    return () => synthesis.removeEventListener('voiceschanged', updateTeluguVoices);
+  }, []);
+
+  useEffect(() => {
     speechRequestRef.current += 1;
     window.speechSynthesis?.cancel();
     setSpeakingMessageId(null);
@@ -116,6 +133,12 @@ export default function AssistantPage() {
     saveSessions(updated);
     setActiveId(newId);
     setActiveSessionId(newId);
+  };
+
+  const updateSpeechVoiceSettings = (changes) => {
+    const updatedSettings = { ...speechVoiceSettings, ...changes };
+    setSpeechVoiceSettingsState(updatedSettings);
+    setSpeechVoiceSettings(updatedSettings);
   };
 
   const handleSendMessage = async (textToSend) => {
@@ -196,7 +219,7 @@ export default function AssistantPage() {
     }
   };
 
-  const handleToggleSpeak = async (msgId, text) => {
+  const handleToggleSpeak = async (msgId, text, voiceGender = speechVoiceSettings.gender) => {
     if (!window.speechSynthesis || typeof window.SpeechSynthesisUtterance !== 'function') {
       setSpeechError(c.speechPlaybackError);
       return;
@@ -229,13 +252,15 @@ export default function AssistantPage() {
     if (requestId !== speechRequestRef.current) return;
 
     const locale = isTelugu ? 'te-IN' : 'en-IN';
-    const matchingVoice = voices.find(voice => voice.lang.toLowerCase() === locale.toLowerCase())
-      || voices.find(voice => voice.lang.toLowerCase() === locale.slice(0, 2).toLowerCase())
-      || voices.find(voice => voice.lang.toLowerCase().startsWith(`${locale.slice(0, 2).toLowerCase()}-`));
+    const matchingVoice = isTelugu
+      ? voices.find(voice => voice.voiceURI === speechVoiceSettings[`${voiceGender}VoiceURI`])
+      : voices.find(voice => voice.lang.toLowerCase() === locale.toLowerCase())
+        || voices.find(voice => voice.lang.toLowerCase() === locale.slice(0, 2).toLowerCase())
+        || voices.find(voice => voice.lang.toLowerCase().startsWith(`${locale.slice(0, 2).toLowerCase()}-`));
 
     if (isTelugu && !matchingVoice) {
       setSpeakingMessageId(null);
-      setSpeechError(c.speechVoiceUnavailable);
+      setSpeechError(teluguVoices.length ? c.speechVoiceSetupRequired : c.speechVoiceUnavailable);
       return;
     }
 
@@ -489,6 +514,74 @@ export default function AssistantPage() {
                 <Send className="w-4 h-4" aria-hidden="true" />
               </button>
             </form>
+
+            {isTelugu && (
+              <section className="rounded-xl border border-teal-100 bg-white p-3 space-y-3" aria-labelledby="telugu-voice-title">
+                <div>
+                  <h2 id="telugu-voice-title" className="text-sm font-bold text-slate-800">
+                    {c.speechVoiceSettingsTitle}
+                  </h2>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {c.speechVoiceSettingsHint}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {[
+                    { gender: 'female', label: c.speechVoiceFemale },
+                    { gender: 'male', label: c.speechVoiceMale }
+                  ].map(({ gender, label }) => (
+                    <div key={gender} className="rounded-lg border border-slate-200 p-2.5 space-y-2">
+                      <button
+                        type="button"
+                        onClick={() => updateSpeechVoiceSettings({ gender })}
+                        aria-pressed={speechVoiceSettings.gender === gender}
+                        className={`w-full rounded-lg px-3 py-2 text-xs font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500 ${
+                          speechVoiceSettings.gender === gender
+                            ? 'bg-teal-700 text-white'
+                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                      <label className="block text-xs font-semibold text-slate-600">
+                        {c.speechVoiceSelect}
+                        <select
+                          value={speechVoiceSettings[`${gender}VoiceURI`]}
+                          onChange={(event) => updateSpeechVoiceSettings({
+                            [`${gender}VoiceURI`]: event.target.value
+                          })}
+                          disabled={teluguVoices.length === 0}
+                          className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2 py-2 text-xs text-slate-800 disabled:bg-slate-100"
+                        >
+                          <option value="">{c.speechVoiceSelectPlaceholder}</option>
+                          {teluguVoices.map((voice, index) => (
+                            <option key={`${voice.voiceURI}-${index}`} value={voice.voiceURI}>
+                              {voice.name} ({voice.lang})
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => handleToggleSpeak(`preview-${gender}`, c.speechVoicePreviewText, gender)}
+                        disabled={!speechVoiceSettings[`${gender}VoiceURI`] || speakingMessageId?.startsWith('preview-')}
+                        className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-teal-700 hover:bg-teal-50 disabled:cursor-not-allowed disabled:text-slate-400"
+                      >
+                        <Volume2 className="h-3.5 w-3.5" aria-hidden="true" />
+                        {c.speechVoicePreview}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {teluguVoices.length === 0 && (
+                  <p role="status" className="text-xs text-amber-800">
+                    {c.speechVoiceUnavailable}
+                  </p>
+                )}
+              </section>
+            )}
 
             {/* Mic Privacy Disclaimer (Matching Screenshot 1) */}
             <p className="text-[11px] text-slate-500 leading-tight">
