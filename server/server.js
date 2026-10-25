@@ -21,6 +21,8 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
 
+app.set('trust proxy', 1);
+
 // 1. Security Headers via Helmet
 app.use(helmet({
   contentSecurityPolicy: false, // Let frontend handle CSP in development
