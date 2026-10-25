@@ -17,7 +17,7 @@ This guide provides step-by-step instructions to deploy **MediMate AI** online f
 
 ## 1️⃣ Deploying on Vercel (Recommended for Beginners)
 
-Vercel hosts the React frontend on its global Edge Network and runs the Express API as a serverless function via `api/index.js`.
+Vercel hosts the React frontend on its global Edge Network and runs the Express API as a serverless function via `api/index.mjs`.
 
 ### Step 1: Push your code to GitHub
 ```bash
