@@ -1,7 +1,7 @@
 /**
  * MediMate AI - Multilingual UI Dictionary (i18n)
- * Supports: English, Telugu (తెలుగు), Hindi (हिन्दी)
- * Lightweight, zero-dependency translation dictionary.
+ * Fully localized English and Telugu (తెలుగు) dictionaries.
+ * Covers all 7 routes, forms, accessibility labels, and clinical safety disclaimers.
  */
 
 export const translations = {
@@ -13,38 +13,93 @@ export const translations = {
       badgeDemo: 'Demo Mode — AI not connected. Pre-written samples.',
       badgeLive: 'Gemini AI Connected',
       disclaimer: 'MediMate AI provides general health information only. It is not a doctor and cannot diagnose or treat medical conditions.',
-      clearData: 'Clear my data',
-      clearDataConfirm: 'Are you sure you want to clear your current session data? All messages will be deleted from your browser.',
+      clearData: 'Clear my session data',
+      clearDataConfirm: 'Are you sure you want to clear your current session data? All temporary messages will be erased from your browser.',
       privacyNotice: 'Privacy & Consent',
       dataClearedToast: 'All session data has been cleared securely.',
       copiedToast: 'Doctor summary copied to clipboard!',
       copyFailedToast: 'Failed to copy summary. Please select and copy manually.'
     },
     nav: {
-      chatTab: 'Health Chat',
-      symptomTab: 'Symptom Checker',
-      summaryTab: 'Doctor Summary',
-      historyTab: 'Recent Sessions',
-      newCheckup: '+ New Conversation'
+      checkSymptoms: 'Check Symptoms',
+      askAI: 'Ask AI',
+      findCare: 'Find Care',
+      reports: 'Reports',
+      safety: 'Safety',
+      privacy: 'Privacy',
+      emergencyCall: 'Call 112'
+    },
+    emergencyBanner: {
+      full: 'Emergency? Chest pain, trouble breathing, stroke signs, heavy bleeding — do not wait for chat advice.',
+      compact: "Emergency? Don't wait for chat advice.",
+      callBtn: 'Call 112',
+      ariaLabel: 'Emergency healthcare notice with direct 112 phone call action'
+    },
+    home: {
+      heroHeading1: 'Your health questions, ',
+      heroHeading2: 'explained simply.',
+      heroSubheading: 'Plain-language health education in English and తెలుగు, plus help finding the right kind of care. Made to inform you, not to replace a doctor.',
+      ctaCheckSymptoms: 'Check Symptoms',
+      ctaAskAI: 'Ask AI',
+      exampleTitle: 'Example conversation',
+      demoDataBadge: 'Demo data',
+      exampleUserMsg: "I've had a headache since this morning.",
+      exampleAssistantMsg: "Headaches have many common causes, like dehydration, stress or poor sleep. This is general information, not a diagnosis. Here are signs that mean you should get care quickly…",
+      notADiagnosis: 'Not a diagnosis',
+      cards: {
+        symptomsTitle: 'Check Symptoms',
+        symptomsDesc: 'Answer a few questions and learn what level of care may fit.',
+        symptomsCta: 'Start',
+        aiTitle: 'Ask AI',
+        aiDesc: 'Ask health questions by typing or speaking.',
+        aiCta: 'Open chat',
+        careTitle: 'Find Nearby Care',
+        careDesc: 'Search clinics and hospitals in Andhra Pradesh.',
+        careCta: 'Search',
+        reportsTitle: 'Explain a Report',
+        reportsDesc: 'Upload a lab report and get terms in plain words.',
+        reportsCta: 'Upload'
+      },
+      howItWorks: {
+        heading: 'How it works',
+        step1Tag: 'Step 1',
+        step1Title: "Tell us what's happening",
+        step1Desc: 'Type, speak, or upload. Share only what is needed.',
+        step2Tag: 'Step 2',
+        step2Title: 'Get it explained simply',
+        step2Desc: 'Possible explanations, clearly labelled as possibilities.',
+        step3Tag: 'Step 3',
+        step3Title: 'Know your next step',
+        step3Desc: 'Self-care, see a doctor, or go to emergency care.'
+      },
+      trust: {
+        privacyTitle: 'Your privacy comes first',
+        privacyDesc: 'Chats stay in this browser tab. Reports are processed temporarily and never stored on any permanent database.',
+        privacyLink: 'Read our privacy policies →',
+        noteTitle: 'Please note',
+        noteDesc: 'MediMate AI gives general health information only. It is not a doctor and cannot rule out dangerous medical conditions.',
+        safetyLink: 'View safety guidelines →'
+      }
     },
     chat: {
-      title: 'AI Health Chat',
-      subtitle: 'Ask any general health question in plain, everyday language.',
-      placeholder: 'Type your health question (e.g., Why do I get a headache after working on my laptop?)...',
+      title: 'Health Assistant',
+      subtitle: 'General information only',
+      placeholder: 'Type your health question (e.g., Why do I have a headache since morning?)...',
       send: 'Send',
       thinking: 'MediMate is thinking...',
-      suggestedStartersTitle: 'Suggested starter questions:',
-      starters: [
-        "I've had a headache since this morning after working on screens.",
-        "How can I tell the difference between a cold and seasonal allergies?",
-        "What are simple, safe ways to soothe a sore throat at home?",
-        "Why do my knees feel stiff in the morning when I wake up?"
-      ],
-      sampleBadge: 'Sample conversation',
-      errorNetwork: 'Unable to reach the server. Please check your connection and retry.',
-      retry: 'Retry message',
-      emptyTitle: 'Welcome to MediMate AI',
-      emptyDesc: 'Choose a starter question above or type any general health topic you would like explained simply.'
+      listen: 'Listen',
+      stop: 'Stop',
+      demoResponse: 'Demo response',
+      demoNotConnected: 'Demo response — AI not connected',
+      liveConnected: 'Gemini AI Connected',
+      listening: 'Listening… review recognized text before sending',
+      cancel: 'Cancel',
+      micDisclaimer: 'Microphone audio may be processed by your browser service. Voice recognition is not 100% accurate.',
+      sourcesTitle: 'Sources',
+      sourcesPlaceholder: '[Verified source titles, links and review dates appear here]',
+      emergencyTitle: 'Emergency?',
+      emergencyText: 'Chest pain, trouble breathing, stroke symptoms, or heavy bleeding — call 112 immediately.',
+      emergencyBtn: 'Call 112'
     },
     form: {
       title: 'Symptom Information Form',
@@ -103,33 +158,94 @@ export const translations = {
       copiedBtn: 'Copied!',
       emptyDesc: 'Your organized summary will appear here after asking questions or submitting symptoms.'
     },
-    history: {
-      title: 'Recent Conversations',
-      empty: 'No saved conversations yet.',
-      sampleTag: 'Sample',
-      activeTag: 'Active'
+    hospitals: {
+      title: 'Find nearby care in Andhra Pradesh',
+      subtitle: 'Verified healthcare clinics, primary centers, and hospitals from OpenStreetMap.',
+      searchLabel: 'City, town or PIN code',
+      searchPlaceholder: 'e.g., Guntur, Vijayawada, 522001...',
+      searchBtn: 'Search',
+      useLocationBtn: 'Use my location',
+      locationPrivacyNote: 'We only ask when you tap this, to sort results by distance. Your symptoms are never sent to the map.',
+      filters: {
+        all: 'All',
+        hospital: 'Hospital',
+        clinic: 'Clinic',
+        within10km: 'Within 10 km'
+      },
+      card: {
+        distanceKm: 'km',
+        phoneLabel: 'Phone: ',
+        sourceLabel: 'Source: ',
+        getDirections: 'Get directions'
+      },
+      outdatedNotice: 'Listings, phone numbers and hours may be outdated. Call first, and call 112 in an emergency.',
+      osmAttribution: '© OpenStreetMap contributors',
+      mapPlaceholder: 'Andhra Pradesh Care Map'
     },
-    privacyModal: {
-      title: 'Your Privacy & Health Consent',
-      desc1: 'Welcome to MediMate AI. Before you begin, please review how we handle your information:',
-      point1: 'No Server Storage: None of your personal health data is saved to a server database or tracked.',
-      point2: 'Local Session Only: Your chat history is stored temporarily in your browser sessionStorage and cleared when you close the tab or click "Clear my data".',
-      point3: 'Educational Scope: MediMate AI provides plain-language health information. It is NOT a doctor and cannot provide clinical diagnoses or prescriptions.',
-      point4: 'Immediate Emergencies: For severe chest pain, trouble breathing, or self-harm thoughts, call 112 / 108 / 988 immediately.',
-      acceptBtn: 'I Understand & Agree',
-      closeBtn: 'Close'
+    reports: {
+      title: 'Explain my report',
+      subtitle: 'Understand medical test numbers in plain words and get prepared with questions for your clinician.',
+      boxTitle: 'Explain my report',
+      dropPrompt: 'Drop a PDF or photo here',
+      fileTypes: 'PDF, JPG or PNG · up to 10 MB',
+      chooseFileBtn: 'Choose file',
+      beforeUploadNotice: 'Before you upload: cover or remove your name, ID numbers and address.',
+      consentLabel: 'I agree to temporary processing. The file is not stored and is deleted right after.',
+      explainBtn: 'Explain this report',
+      analyzingBtn: 'Analyzing report...',
+      summaryHeading: 'Plain-language summary',
+      demoBadge: 'Demo data',
+      tableHeaders: {
+        test: 'Test',
+        yourValue: 'Your value',
+        labRange: 'Lab range',
+        reportFlag: 'Report flag'
+      },
+      rangeNote: 'Ranges vary by lab and person. Flags come from the report, not from us.',
+      clinicianQuestionsHeading: 'Questions to ask your clinician',
+      notADiagnosisWarning: 'A report alone cannot confirm a diagnosis.'
+    },
+    safetyPage: {
+      badge: 'Health Safety & Emergency Protocol',
+      heading: 'Safety Policies & Emergency Guidance',
+      subheading: 'MediMate AI places patient safety above all else. In any acute or life-threatening situation, users are immediately directed to emergency services without delay.',
+      hotlinesHeading: 'Emergency Hotlines in India & Andhra Pradesh',
+      national112: 'All emergencies (Police, Fire, Medical)',
+      ambulance108: 'Free 24/7 Government Ambulance',
+      telemanas14416: '24/7 Mental health & suicide crisis',
+      poisonLine: 'National Poison Centre (AIIMS)',
+      redFlagsHeading: 'Red-Flag Symptoms Requiring Immediate 112 Call',
+      engineHeading: 'How the Safety Check Engine Works',
+      engineDesc: 'Every message and symptom submission is evaluated by our zero-delay rule-based safety engine before any AI call. If any emergency keyword in English, Telugu, or Hindi is detected, the system immediately returns hardcoded emergency instructions and 112 contact buttons.'
+    },
+    privacyPage: {
+      badge: 'Privacy & Data Protection Notice',
+      heading: 'Privacy-First Architecture',
+      subheading: 'MediMate AI does not maintain user accounts, tracking cookies, or server databases. Your health interactions remain entirely within your private session.',
+      pillar1Title: 'Zero Server Database',
+      pillar1Desc: 'Zero user chats or health submissions are persisted in any server-side database. Sessions exist in your browser memory.',
+      pillar2Title: 'Ephemeral Processing',
+      pillar2Desc: 'Medical report files are analyzed in volatile memory and deleted immediately after processing.',
+      pillar3Title: 'Client-Only Session',
+      pillar3Desc: 'Chats are held strictly in sessionStorage. Closing the browser tab clears your conversation history automatically.',
+      dpdpHeading: 'Alignment with India’s DPDP Act 2023',
+      dpdpDesc: 'MediMate AI adheres to data minimization principles under India’s Digital Personal Data Protection Act, 2023. Explicit consent is required before processing lab reports. Notice: Full formal regulatory certification requires qualified legal and clinical compliance review prior to commercial deployment.',
+      mapPrivacyNotice: 'Map Search Privacy: When finding nearby care in Andhra Pradesh, your health questions and symptoms are NEVER transmitted to OpenStreetMap or map APIs.',
+      purgeTitle: 'Purge All Browser Session Data',
+      purgeDesc: 'Immediately deletes all temporary conversation logs and preloaded demo data from this device.',
+      purgeBtn: 'Clear My Data'
     }
   },
 
   te: {
     app: {
-      name: 'మెడిమేట్ AI (MediMate AI)',
+      name: 'మెడిమేట్ AI',
       tagline: 'మీ ఆరోగ్య సందేహాలు, సరళమైన వివరణ.',
       theme: 'రోజువారీ జీవితాన్ని సులభతరం చేయడం — సంక్లిష్టతను సులభం చేయండి.',
       badgeDemo: 'డెమో మోడ్ — AI కనెక్ట్ కాలేదు. నమూనా సమాధానాలు.',
       badgeLive: 'జెమిని AI కనెక్ట్ చేయబడింది',
       disclaimer: 'మెడిమేట్ AI కేవలం సాధారణ ఆరోగ్య అవగాహన కొరకు మాత్రమే. ఇది డాక్టర్ కాదు మరియు వ్యాధి నిర్ధారణ లేదా చికిత్స చేయలేదు.',
-      clearData: 'నా డేటా తొలగించు',
+      clearData: 'నా తాత్కాలిక డేటా తొలగించండి',
       clearDataConfirm: 'మీరు ప్రస్తుత సెషన్ డేటాను తొలగించాలనుకుంటున్నారా? మీ బ్రౌజర్ నుండి అన్ని సందేశాలు తొలగించబడతాయి.',
       privacyNotice: 'గోప్యత & సమ్మతి',
       dataClearedToast: 'సెషన్ డేటా విజయవంతంగా తొలగించబడింది.',
@@ -137,30 +253,85 @@ export const translations = {
       copyFailedToast: 'కాపీ చేయడం విఫలమైంది. దయచేసి మాన్యువల్‌గా కాపీ చేయండి.'
     },
     nav: {
-      chatTab: 'ఆరోగ్య చాట్',
-      symptomTab: 'లక్షణాల పరిశీలన',
-      summaryTab: 'డాక్టర్ సారాంశం',
-      historyTab: 'గత సంభాషణలు',
-      newCheckup: '+ కొత్త సంభాషణ'
+      checkSymptoms: 'లక్షణాలు పరిశీలించండి',
+      askAI: 'ఆరోగ్య సహాయకుడు',
+      findCare: 'వైద్యశాలలు',
+      reports: 'రిపోర్టు వివరణ',
+      safety: 'భద్రత',
+      privacy: 'గోప్యత',
+      emergencyCall: '112 కి కాల్'
+    },
+    emergencyBanner: {
+      full: 'అత్యవసరమా? ఛాతి నొప్పి, శ్వాస ఆడకపోవడం, పక్షవాత లక్షణాలు, తీవ్ర రక్తస్రావం — చాట్ సలహా కోసం వేచి ఉండకండి.',
+      compact: 'అత్యవసరమా? చాట్ సలహా కోసం ఆగవద్దు.',
+      callBtn: '112 కి కాల్',
+      ariaLabel: 'అత్యవసర ఆరోగ్య హెచ్చరిక మరియు 112 కి నేరుగా కాల్ చేయండి'
+    },
+    home: {
+      heroHeading1: 'మీ ఆరోగ్య సందేహాలు, ',
+      heroHeading2: 'సులభమైన వివరణ.',
+      heroSubheading: 'సరళమైన తెలుగు మరియు ఇంగ్లీషులో ఆరోగ్య సమాచారం, అలాగే సరైన వైద్య సంరక్షణను కనుగొనడంలో సహాయం. మీకు అవగాహన కల్పించేందుకే, వైద్యునికి ప్రత్యామ్నాయం కాదు.',
+      ctaCheckSymptoms: 'లక్షణాలు పరిశీలించండి',
+      ctaAskAI: 'ఆరోగ్య సహాయకుడిని అడగండి',
+      exampleTitle: 'ఉదాహరణ సంభాషణ',
+      demoDataBadge: 'డెమో సమాచారం',
+      exampleUserMsg: 'ఉదయం నుండి తలనొప్పిగా ఉంది.',
+      exampleAssistantMsg: 'తలనొప్పికి సాధారణ కారణాలు: తగినంత నీరు తాగకపోవడం, పని ఒత్తిడి లేదా నిద్ర లేకపోవడం. ఇది సాధారణ సమాచారం మాత్రమే, నిర్ధారణ కాదు. ఇక్కడ మీరు త్వరగా వైద్యుడిని సంప్రదించాల్సిన సంకేతాలు ఉన్నాయి...',
+      notADiagnosis: 'వైద్య నిర్ధారణ కాదు',
+      cards: {
+        symptomsTitle: 'లక్షణాలు పరిశీలించండి',
+        symptomsDesc: 'కొన్ని ప్రశ్నలకు సమాధానమిచ్చి ఎలాంటి సంరక్షణ అవసరమో తెలుసుకోండి.',
+        symptomsCta: 'ప్రారంభించండి',
+        aiTitle: 'ఆరోగ్య సహాయకుడు',
+        aiDesc: 'టైప్ చేయడం లేదా మాట్లాడటం ద్వారా ఆరోగ్య ప్రశ్నలు అడగండి.',
+        aiCta: 'చాట్ తెరవండి',
+        careTitle: 'వైద్యశాలలు కనుగొనండి',
+        careDesc: 'ఆంధ్రప్రదేశ్‌లోని ఆసుపత్రులు మరియు క్లినిక్‌లను వెతకండి.',
+        careCta: 'శోధించండి',
+        reportsTitle: 'రిపోర్టు వివరణ',
+        reportsDesc: 'ల్యాబ్ రిపోర్టును అప్‌లోడ్ చేసి నిబంధనలను సరళమైన మాటల్లో తెలుసుకోండి.',
+        reportsCta: 'అప్‌లోడ్'
+      },
+      howItWorks: {
+        heading: 'ఇది ఎలా పనిచేస్తుంది',
+        step1Tag: 'దశ 1',
+        step1Title: 'ఏమి జరుగుతుందో చెప్పండి',
+        step1Desc: 'టైప్ చేయండి, మాట్లాడండి లేదా అప్‌లోడ్ చేయండి. అవసరమైనది మాత్రమే పంచుకోండి.',
+        step2Tag: 'దశ 2',
+        step2Title: 'సరళంగా వివరణ పొందండి',
+        step2Desc: 'సాధ్యమయ్యే కారణాలు, కేవలం అవకాశాలుగా మాత్రమే లేబుల్ చేయబడతాయి.',
+        step3Tag: 'దశ 3',
+        step3Title: 'మీ తదుపరి అడుగు తెలుసుకోండి',
+        step3Desc: 'స్వీయ సంరక్షణ, వైద్యుడిని కలవడం లేదా అత్యవసర విభాగానికి వెళ్లడం.'
+      },
+      trust: {
+        privacyTitle: 'మీ గోప్యతే మా మొదటి ప్రాధాన్యత',
+        privacyDesc: 'చాట్‌లు ఈ బ్రౌజర్ ట్యాబ్‌లోనే ఉంటాయి. రిపోర్టులు తాత్కాలికంగా మాత్రమే ప్రాసెస్ చేయబడతాయి మరియు సర్వర్‌లలో సేవ్ చేయబడవు.',
+        privacyLink: 'గోప్యతా విధానం చదవండి →',
+        noteTitle: 'దయచేసి గమనించండి',
+        noteDesc: 'మెడిమేట్ ఎఐ సాధారణ ఆరోగ్య సమాచారాన్ని మాత్రమే అందిస్తుంది. ఇది వైద్యుడు కాదు, ప్రమాదకరమైన పరిస్థితులను తోసిపుచ్చలేదు.',
+        safetyLink: 'భద్రతా మార్గదర్శకాలు చూడండి →'
+      }
     },
     chat: {
-      title: 'AI ఆరోగ్య చాట్',
-      subtitle: 'ఏదైనా సాధారణ ఆరోగ్య ప్రశ్నను సరళమైన తెలుగులో అడగండి.',
-      placeholder: 'మీ ఆరోగ్య ప్రశ్నను టైప్ చేయండి (ఉదా: కంప్యూటర్ చూసినప్పుడు తలనొప్పి ఎందుకు వస్తుంది?)...',
-      send: 'పంపు',
-      thinking: 'మెడిమేట్ ఆలోచిస్తోంది...',
-      suggestedStartersTitle: 'ప్రారంభ ప్రశ్నల సూచనలు:',
-      starters: [
-        "ఉదయం నుండి నాకు తలనొప్పిగా ఉంది, సాధారణ కారణాలు ఏమిటి?",
-        "జలుబు మరియు అలర్జీల మధ్య తేడాను ఎలా గుర్తించాలి?",
-        "గొంతు నొప్పికి ఇంట్లోనే సురక్షితమైన ఉపశమనం ఎలా పొందాలి?",
-        "ఉదయం నిద్రలేవగానే మోకాళ్ల కీళ్ళు ఎందుకు బిగుసుకుపోతాయి?"
-      ],
-      sampleBadge: 'నమూనా సంభాషణ',
-      errorNetwork: 'సర్వర్‌ను సంప్రదించలేకపోయాము. దయచేసి ఇంటర్నెట్ సరిచూసుకొని మళ్ళీ ప్రయత్నించండి.',
-      retry: 'మళ్ళీ ప్రయత్నించు',
-      emptyTitle: 'మెడిమేట్ AI కి స్వాగతం',
-      emptyDesc: 'పైన ఉన్న ప్రశ్నలలో ఒకదాన్ని ఎంచుకోండి లేదా మీ ఆరోగ్య సందేహాన్ని ఇక్కడ రాయండి.'
+      title: 'ఆరోగ్య సహాయకుడు',
+      subtitle: 'సాధారణ సమాచారం మాత్రమే',
+      placeholder: 'మీ ఆరోగ్య ప్రశ్నను టైప్ చేయండి (ఉదా: ఉదయం నుండి తలనొప్పిగా ఉంది)...',
+      send: 'పంపండి',
+      thinking: 'సహాయకుడు ఆలోచిస్తున్నాడు...',
+      listen: 'జవాబు వినండి',
+      stop: 'ఆపండి',
+      demoResponse: 'డెమో ప్రతిస్పందన',
+      demoNotConnected: 'డెమో మోడ్ — ఎఐ కనెక్ట్ కాలేదు',
+      liveConnected: 'జెమిని ఎఐ కనెక్ట్ అయింది',
+      listening: 'వింటున్నాము… గుర్తించిన పాఠం పంపే ముందు సరిచేయండి',
+      cancel: 'రద్దు చేయండి',
+      micDisclaimer: 'మైక్ ఆడియోను మీ బ్రౌజర్ సేవ బయటకు పంపవచ్చు. తెలుగు గుర్తింపు పరిపూర్ణం కాదు.',
+      sourcesTitle: 'ఆధారాలు',
+      sourcesPlaceholder: '[ధృవీకరించబడిన మూలాలు, లింకులు మరియు సమీక్షించిన తేదీలు ఇక్కడ కనిపిస్తాయి]',
+      emergencyTitle: 'అత్యవసరమా?',
+      emergencyText: 'ఛాతి నొప్పి, శ్వాస ఆడకపోవడం, పక్షవాత లక్షణాలు లేదా తీవ్ర రక్తస్రావం కనిపిస్తే — వెంటనే 112 కి కాల్ చేయండి.',
+      emergencyBtn: '112 కి కాల్ చేయండి'
     },
     form: {
       title: 'లక్షణాల సమాచార ఫారమ్',
@@ -219,137 +390,82 @@ export const translations = {
       copiedBtn: 'కాపీ అయ్యింది!',
       emptyDesc: 'లక్షణాల ఫారమ్ సమర్పించిన తర్వాత మీ సారాంశం ఇక్కడ సిద్ధంగా ఉంటుంది.'
     },
-    history: {
-      title: 'గత సంభాషణలు',
-      empty: 'ఇంకా సంభాషణలు లేవు.',
-      sampleTag: 'నమూనా',
-      activeTag: 'ప్రస్తుత'
-    },
-    privacyModal: {
-      title: 'మీ గోప్యత & ఆరోగ్య సమ్మతి',
-      desc1: 'మెడిమేట్ AI కి స్వాగతం. మేము సమాచారాన్ని ఎలా భద్రపరుస్తామో తెలుసుకోండి:',
-      point1: 'సర్వర్ నిల్వ లేదు: మీ వ్యక్తిగత ఆరోగ్య డేటా ఏ సర్వర్‌లోనూ నిల్వ చేయబడదు.',
-      point2: 'బ్రౌజర్ సెషన్ మాత్రమే: మీ సంభాషణ కేవలం మీ బ్రౌజర్ sessionStorage లో మాత్రమే తాత్కాలికంగా ఉంటుంది.',
-      point3: 'విద్యా ప్రయోజనాలే: ఇది కేవలం అవగాహన కొరకు మాత్రమే. డాక్టర్ చికిత్సకు ప్రత్యామ్నాయం కాదు.',
-      point4: 'అత్యవసర పరిస్థితులు: గుండె నొప్పి లేదా శ్వాస ఇబ్బంది ఉంటే వెంటనే 112 లేదా 108 కు కాల్ చేయండి.',
-      acceptBtn: 'నేను అర్థం చేసుకున్నాను & అంగీకరిస్తున్నాను',
-      closeBtn: 'మూసివేయి'
-    }
-  },
-
-  hi: {
-    app: {
-      name: 'मेडीमेट एआई (MediMate AI)',
-      tagline: 'आपके स्वास्थ्य प्रश्न, आसान शब्दों में।',
-      theme: 'रोजमर्रा की जिंदगी को आसान बनाएं — जटिल को सरल बनाएं।',
-      badgeDemo: 'डेमो मोड — AI कनेक्ट नहीं है। पूर्व-लिखित उत्तर।',
-      badgeLive: 'जेमिनी AI कनेक्टेड',
-      disclaimer: 'MediMate AI केवल सामान्य स्वास्थ्य शिक्षा प्रदान करता है। यह डॉक्टर नहीं है और किसी बीमारी का निदान या इलाज नहीं कर सकता।',
-      clearData: 'मेरा डेटा हटाएं',
-      clearDataConfirm: 'क्या आप वर्तमान सत्र का डेटा हटाना चाहते हैं? सभी संदेश आपके ब्राउज़र से हटा दिए जाएंगे।',
-      privacyNotice: 'गोपनीयता और सहमति',
-      dataClearedToast: 'सत्र का डेटा सुरक्षित रूप से हटा दिया गया है।',
-      copiedToast: 'डॉक्टर सारांश क्लिपबोर्ड पर कॉपी हो गया!',
-      copyFailedToast: 'कॉपी करने में विफल। कृपया स्वयं कॉपी करें।'
-    },
-    nav: {
-      chatTab: 'स्वास्थ्य चैट',
-      symptomTab: 'लक्षण जांच',
-      summaryTab: 'डॉक्टर सारांश',
-      historyTab: 'पिछली बातचीत',
-      newCheckup: '+ नई बातचीत'
-    },
-    chat: {
-      title: 'AI स्वास्थ्य चैट',
-      subtitle: 'कोई भी सामान्य स्वास्थ्य प्रश्न सरल हिंदी में पूछें।',
-      placeholder: 'अपना स्वास्थ्य प्रश्न लिखें (जैसे: कंप्यूटर पर काम करने के बाद सिरदर्द क्यों होता है?)...',
-      send: 'भेजें',
-      thinking: 'मेडीमेट विचार कर रहा है...',
-      suggestedStartersTitle: 'सुझाए गए शुरुआती प्रश्न:',
-      starters: [
-        "आज सुबह से स्क्रीन पर काम करने के बाद मुझे सिरदर्द हो रहा है।",
-        "सर्दी-जुकाम और मौसमी एलर्जी के बीच क्या अंतर है?",
-        "घर पर गले की खराश को दूर करने के सुरक्षित उपाय क्या हैं?",
-        "सुबह उठने पर घुटने और जोड़ों में अकड़न क्यों होती है?"
-      ],
-      sampleBadge: 'नमूना बातचीत',
-      errorNetwork: 'सर्वर से संपर्क नहीं हो सका। कृपया इंटरनेट जांचें और पुनः प्रयास करें।',
-      retry: 'पुनः प्रयास करें',
-      emptyTitle: 'MediMate AI में आपका स्वागत है',
-      emptyDesc: 'ऊपर दिए गए सुझावों में से चुनें या अपना कोई भी प्रश्न यहां टाइप करें।'
-    },
-    form: {
-      title: 'लक्षण जानकारी फॉर्म',
-      subtitle: 'अपने लक्षण दर्ज करें और सरल व्याख्या व डॉक्टर के लिए सारांश प्राप्त करें।',
-      mainSymptomLabel: 'मुख्य लक्षण',
-      mainSymptomPlaceholder: 'उदा: माथे पर हल्का सिरदर्द, गले में खराश',
-      mainSymptomError: 'कृपया अपना मुख्य लक्षण दर्ज करें (कम से कम 3 अक्षर)।',
-      durationLabel: 'यह कब से महसूस हो रहा है?',
-      durationPlaceholder: 'उदा: आज सुबह से, 2 दिनों से, एक हफ्ते से',
-      durationError: 'कृपया बताएं कि यह लक्षण कब से है।',
-      severityLabel: 'गंभीरता का स्तर',
-      severityScaleHelp: '1 = बहुत हल्का, 10 = असहनीय तेज दर्द',
-      ageRangeLabel: 'आयु वर्ग',
-      ageRangeOptions: {
-        infant: 'शिशु / छोटा बच्चा (0 - 2 वर्ष)',
-        child: 'बच्चा (3 - 12 वर्ष)',
-        teen: 'किशोर (13 - 17 वर्ष)',
-        youngAdult: 'युवा (18 - 35 वर्ष)',
-        middleAdult: 'प्रौढ़ (36 - 64 वर्ष)',
-        senior: 'वरिष्ठ नागरिक (65+ वर्ष)'
+    hospitals: {
+      title: 'ఆంధ్రప్రదేశ్‌లో సమీప వైద్య సంరక్షణ',
+      subtitle: 'ఓపెన్‌స్ట్రీట్‌మ్యాప్ (OpenStreetMap) ద్వారా అధికారిక ఆసుపత్రులు మరియు క్లినిక్‌ల వివరాలు.',
+      searchLabel: 'నగరం, పట్టణం లేదా పిన్ కోడ్',
+      searchPlaceholder: 'ఉదా: గుంటూరు, విజయవాడ, 520002...',
+      searchBtn: 'శోధించండి',
+      useLocationBtn: 'నా ప్రస్తుత స్థానాన్ని ఉపయోగించండి',
+      locationPrivacyNote: 'దూరాన్ని క్రమబద్ధీకరించడానికి మాత్రమే లొకేషన్ అడుగుతాము. మీ ఆరోగ్య లక్షణాలు మ్యాప్‌కు ఎప్పటికీ పంపబడవు.',
+      filters: {
+        all: 'అన్నీ',
+        hospital: 'ఆసుపత్రి',
+        clinic: 'క్లినిక్',
+        within10km: '10 కి.మీ లోపు'
       },
-      contextLabel: 'प्रासंगिक संदर्भ (वैकल्पिक)',
-      contextPlaceholder: 'उदा: देर रात तक काम किया, अधिक स्क्रीन समय, ब्लड प्रेशर...',
-      otherDetailsLabel: 'अन्य विवरण (वैकल्पिक)',
-      otherDetailsPlaceholder: 'उदा: भोजन के बाद बढ़ जाता है, आराम करने पर राहत मिलती है...',
-      submitBtn: 'लक्षणों का विश्लेषण करें व सारांश बनाएं',
-      submittingBtn: 'जांच जारी है...',
-      resetBtn: 'फॉर्म रीसेट करें'
+      card: {
+        distanceKm: 'కి.మీ',
+        phoneLabel: 'ఫోన్: ',
+        sourceLabel: 'మూలం: ',
+        getDirections: 'దారి చూపించు (దిశలు)'
+      },
+      outdatedNotice: 'ఆసుపత్రుల సమయాలు మరియు ఫోన్ నంబర్లు మారే అవకాశం ఉంది. వెళ్లే ముందు కాల్ చేయండి. అత్యవసరమైతే 112 కి కాల్ చేయండి.',
+      osmAttribution: '© OpenStreetMap contributors',
+      mapPlaceholder: 'ఆంధ్రప్రదేశ్ కేర్ మ్యాప్'
     },
-    results: {
-      title: 'शैक्षिक लक्षण व्याख्या',
-      disclaimerNotice: 'यह सामान्य संभावित कारणों की जानकारी है — चिकित्सकीय निदान (डायग्नोसिस) नहीं।',
-      explanationsHeader: 'संभावित, आम कारण',
-      selfCareHeader: 'सुरक्षित स्व-देखभाल जानकारी',
-      warningSignsHeader: 'सावधानी के संकेत (चेतावनी)',
-      whenToSeeDoctorHeader: 'डॉक्टर को कब दिखाना चाहिए',
-      questionsHeader: 'डॉक्टर से पूछने योग्य प्रश्न',
-      emptyState: 'जानकारी देखने के लिए बाईं ओर दिया गया फॉर्म भरें।'
+    reports: {
+      title: 'ల్యాబ్ రిపోర్టు వివరణ',
+      subtitle: 'రక్త పరీక్షలు మరియు ల్యాబ్ రిపోర్టులను అర్థమయ్యే రీతిలో తెలుసుకోండి. వైద్యుడిని సంప్రదించడానికి ప్రశ్నలను రూపొందించుకోండి.',
+      boxTitle: 'రిపోర్టును సమర్పించండి',
+      dropPrompt: 'PDF లేదా ఫోటో ఇక్కడ డ్రాప్ చేయండి',
+      fileTypes: 'PDF, JPG or PNG · up to 10 MB',
+      chooseFileBtn: 'ఫైల్‌ను ఎంచుకోండి',
+      beforeUploadNotice: 'అప్‌లోడ్ చేసే ముందు: మీ పేరు, చిరునామా, ఆధార్ లేదా గుర్తింపు నంబర్లను కవర్ చేయండి లేదా తీసివేయండి.',
+      consentLabel: 'తాత్కాలిక ప్రాసెసింగ్‌కు నేను అంగీకరిస్తున్నాను. ఫైల్ సర్వర్‌లో నిల్వ చేయబడదు మరియు వెంటనే తొలగించబడుతుంది.',
+      explainBtn: 'ఈ రిపోర్టును వివరించండి',
+      analyzingBtn: 'రిపోర్టును విశ్లేషిస్తున్నాము...',
+      summaryHeading: 'సరళమైన వివరణ సారాంశం',
+      demoBadge: 'డెమో విశ్లేషణ',
+      tableHeaders: {
+        test: 'పరీక్ష',
+        yourValue: 'మీ విలువ',
+        labRange: 'ల్యాబ్ పరిధి',
+        reportFlag: 'రిపోర్ట్ ఫ్లాగ్'
+      },
+      rangeNote: 'పరిధులు ల్యాబ్ మరియు వ్యక్తిని బట్టి మారవచ్చు. ఫ్లాగ్‌లు రిపోర్టు ఆధారంగానే ఇవ్వబడ్డాయి.',
+      clinicianQuestionsHeading: 'మీ వైద్యుడిని అడగవలసిన ప్రశ్నలు',
+      notADiagnosisWarning: 'రిపోర్టు ఒక్కటే వ్యాధిని నిర్ధారించలేదు. పూర్తి వివరాలకు మీ వైద్యుడిని కలవండి.'
     },
-    urgency: {
-      emergency: 'आपातकाल: तत्काल अस्पताल के आपातकालीन वार्ड में जाएं',
-      urgent: 'जल्द डॉक्टर से मिलें (24–48 घंटों के भीतर)',
-      routine: 'घर पर स्व-देखभाल एवं निगरानी'
+    safetyPage: {
+      badge: 'ఆరోగ్య భద్రతా ప్రోటోకాల్',
+      heading: 'భద్రత మరియు అత్యవసర మార్గదర్శకాలు',
+      subheading: 'మెడిమేట్ ఎఐ వినియోగదారుల భద్రతను అత్యున్నత ప్రాధాన్యతగా తీసుకుంటుంది. ప్రాణాంతక పరిస్థితులలో ఎఐ చాట్ కోసం వేచి ఉండకుండా తక్షణమే అత్యవసర సేవలను సంప్రదించాలి.',
+      hotlinesHeading: 'భారతదేశ అత్యవసర హెల్ప్‌లైన్ నంబర్లు',
+      national112: 'అన్ని అత్యవసరాలు (పోలీస్, ఫైర్, మెడికల్)',
+      ambulance108: 'ఉచిత 24/7 ప్రభుత్వ అంబులెన్స్ సేవ',
+      telemanas14416: '24/7 మానసిక ఆరోగ్య & సంక్షోభ హెల్ప్‌లైన్',
+      poisonLine: 'జాతీయ విష సమాచార కేంద్రం (AIIMS)',
+      redFlagsHeading: 'వెంటనే అత్యవసర చికిత్స అవసరమైన లక్షణాలు (112)',
+      engineHeading: 'మెడిమేట్ ఎఐ భద్రతా నిబంధనలు ఎలా పనిచేస్తాయి',
+      engineDesc: 'ప్రతి సందేశం మరియు లక్షణ ఫారమ్ సర్వర్‌లోని నియమ-ఆధారిత భద్రతా పొర ద్వారా తనిఖీ చేయబడుతుంది. ఎటువంటి ప్రమాదకర కీవర్డ్‌లు కనిపించినా, ఎఐ సమాధానం కోసం వేచి ఉండకుండా నేరుగా 112 అత్యవసర సూచనలు ప్రదర్శించబడతాయి.'
     },
-    summaryCard: {
-      title: 'डॉक्टर परामर्श सारांश',
-      subtitle: 'अपने डॉक्टर से मिलने जाते समय इस संरचित नोट का उपयोग करें।',
-      patientInfo: 'दर्ज विवरण',
-      symptoms: 'मुख्य लक्षण',
-      duration: 'अवधि',
-      severity: 'गंभीरता',
-      ageRange: 'आयु',
-      context: 'संदर्भ',
-      questionsToAsk: 'डॉक्टर से पूछने योग्य प्रश्न',
-      copyBtn: 'क्लिपबोर्ड पर कॉपी करें',
-      copiedBtn: 'कॉपी हो गया!',
-      emptyDesc: 'सवालों के जवाब या फॉर्म भरने के बाद आपका व्यवस्थित सारांश यहां तैयार होगा।'
-    },
-    history: {
-      title: 'हालिया बातचीत',
-      empty: 'अभी कोई बातचीत सहेजी नहीं गई है।',
-      sampleTag: 'नमूना',
-      activeTag: 'सक्रिय'
-    },
-    privacyModal: {
-      title: 'आपकी गोपनीयता एवं स्वास्थ्य सहमति',
-      desc1: 'MediMate AI में आपका स्वागत है। उपयोग करने से पहले कृपया समझें:',
-      point1: 'कोई सर्वर स्टोरेज नहीं: आपकी कोई भी व्यक्तिगत स्वास्थ्य जानकारी किसी सर्वर पर सहेजी नहीं जाती।',
-      point2: 'केवल स्थानीय सत्र: आपकी बातचीत केवल आपके ब्राउज़र के sessionStorage में अस्थायी रूप से रहती है।',
-      point3: 'केवल शैक्षिक जानकारी: यह डॉक्टर नहीं है और किसी बीमारी की जांच या दवा की सलाह नहीं देता।',
-      point4: 'आपात स्थिति: सीने में तेज दर्द या सांस की तकलीफ में तुरंत 112 या 108 पर कॉल करें।',
-      acceptBtn: 'मैं समझता/समझती हूँ और सहमत हूँ',
-      closeBtn: 'बंद करें'
+    privacyPage: {
+      badge: 'గోప్యత & డేటా రక్షణ నోటీసు',
+      heading: 'మీ వ్యక్తిగత ఆరోగ్య డేటా రక్షణ',
+      subheading: 'మెడిమేట్ ఎఐ ఎటువంటి శాశ్వత యూజర్ ప్రొఫైల్‌లు లేదా డేటాబేస్‌లను నిల్వ చేయదు. మీ ఆరోగ్య వివరాలు మీ బ్రౌజర్‌కే పరిమితం.',
+      pillar1Title: 'సర్వర్ డేటాబేస్ నిల్వ లేదు',
+      pillar1Desc: 'మేము ఏ సర్వర్‌లోనూ వినియోగదారుల ఆరోగ్య వివరాలు, చాట్‌లు లేదా ఐపీ చిరునామాలను సేవ్ చేయము.',
+      pillar2Title: 'తాత్కాలిక ఫైల్ ప్రాసెసింగ్',
+      pillar2Desc: 'ల్యాబ్ రిపోర్టులు మెమరీలో మాత్రమే చదవబడతాయి మరియు వివరణ ఇచ్చిన వెంటనే పూర్తిగా తొలగించబడతాయి.',
+      pillar3Title: 'స్థానిక నియంత్రణ (sessionStorage)',
+      pillar3Desc: 'చాట్ చరిత్ర కేవలం sessionStorage లో మాత్రమే ఉంచబడుతుంది, ట్యాబ్ మూసివేయగానే తొలగిపోతుంది.',
+      dpdpHeading: 'డిజిటల్ పర్సనల్ డేటా ప్రొటెక్షన్ (DPDP) యాక్ట్ 2023 సమాచారం',
+      dpdpDesc: 'భారతదేశ డిజిటల్ పర్సనల్ డేటా ప్రొటెక్షన్ చట్టం 2023 ప్రకారం, వినియోగదారుల సమ్మతి మరియు డేటా తగ్గింపు (Data Minimization) సిద్ధాంతాలను మేము పాటిస్తాము. ల్యాబ్ రిపోర్టులను సమర్పించేటప్పుడు వినియోగదారుడి నుండి స్పష్టమైన సమ్మతిని తీసుకుంటాము.',
+      mapPrivacyNotice: 'మ్యాప్ శోధనలో గోప్యత: సమీప ఆసుపత్రుల కోసం శోధించినప్పుడు, మీ ఆరోగ్య లక్షణాలు లేదా ప్రశ్నలు ఓపెన్‌స్ట్రీట్‌మ్యాప్‌కు ఎప్పటికీ పంపబడవు.',
+      purgeTitle: 'నా బ్రౌజర్ డేటాను తొలగించండి',
+      purgeDesc: 'ఈ బ్రౌజర్‌లో నిల్వ ఉన్న అన్ని తాత్కాలిక సంభాషణలను తక్షణమే తొలగిస్తుంది.',
+      purgeBtn: 'అన్ని డేటాను తుడిచివేయండి'
     }
   }
 };

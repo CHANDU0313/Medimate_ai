@@ -9,6 +9,8 @@ import { apiRateLimiter } from './middleware/rateLimiter.js';
 import healthRoutes from './routes/health.js';
 import chatRoutes from './routes/chat.js';
 import symptomRoutes from './routes/symptoms.js';
+import hospitalRoutes from './routes/hospitals.js';
+import reportRoutes from './routes/reports.js';
 import { isAIConfigured } from './services/geminiService.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -50,6 +52,8 @@ app.use('/api', apiRateLimiter);
 app.use('/api/health', healthRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/symptoms', symptomRoutes);
+app.use('/api/hospitals', hospitalRoutes);
+app.use('/api/reports', reportRoutes);
 
 // 6. Serve static React client in production if client/dist exists
 if (fs.existsSync(clientDistPath)) {
@@ -68,7 +72,7 @@ if (fs.existsSync(clientDistPath)) {
       tagline: 'Your health questions, explained simply.',
       status: 'running',
       aiStatus: isAIConfigured() ? 'Gemini AI Connected' : 'Demo Mode Active (Pre-written responses)',
-      docs: 'Endpoints: GET /api/health, POST /api/chat, POST /api/symptoms'
+      docs: 'Endpoints: GET /api/health, POST /api/chat, POST /api/symptoms, GET /api/hospitals, POST /api/reports'
     });
   });
 }
@@ -92,14 +96,18 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`\n======================================================`);
-  console.log(` MediMate AI Server running on port ${PORT}`);
-  console.log(` URL: http://localhost:${PORT}`);
-  console.log(` Mode: ${isAIConfigured() ? '🟢 LIVE AI (Google Gemini)' : '🟡 DEMO MODE (Pre-written high-quality samples)'}`);
-  console.log(` Emergency Safety Checker: 🛡️ ACTIVE (English, Telugu, Hindi)`);
-  console.log(`======================================================\n`);
-});
+// Start Server if run directly
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`\n======================================================`);
+    console.log(` MediMate AI Server running on port ${PORT}`);
+    console.log(` URL: http://localhost:${PORT}`);
+    console.log(` Mode: ${isAIConfigured() ? '🟢 LIVE AI (Google Gemini)' : '🟡 DEMO MODE (Pre-written high-quality samples)'}`);
+    console.log(` Emergency Safety Checker: 🛡️ ACTIVE (English, Telugu, Hindi)`);
+    console.log(` Healthcare Navigation: 🏥 Andhra Pradesh Facilities Active`);
+    console.log(` Report Explainer: 📄 Ephemeral Privacy-Preserving Parser Active`);
+    console.log(`======================================================\n`);
+  });
+}
 
 export default app;

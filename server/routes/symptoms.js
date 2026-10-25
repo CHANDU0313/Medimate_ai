@@ -2,60 +2,26 @@ import { Router } from 'express';
 import { checkSafety } from '../utils/safetyCheck.js';
 import { analyzeSymptoms } from '../services/geminiService.js';
 import { submissionLimiter } from '../middleware/rateLimiter.js';
+import { symptomRequestSchema } from '../utils/schemas.js';
 
 const router = Router();
 
-// Field length constraints
-const MAX_FIELD_LENGTH = 1000;
-
 router.post('/', submissionLimiter, async (req, res) => {
   try {
-    const { formData, language = 'en' } = req.body;
-
-    if (!formData || typeof formData !== 'object') {
+    // 1. Zod Schema Validation
+    const validation = symptomRequestSchema.safeParse(req.body);
+    if (!validation.success) {
       return res.status(400).json({
         success: false,
-        error: 'Form data is required.'
+        error: validation.error?.issues?.[0]?.message || 'Invalid symptom form data.',
+        details: validation.error?.issues || []
       });
     }
 
-    const { mainSymptom, duration, severity, ageRange, context, otherDetails } = formData;
+    const { formData, language } = validation.data;
 
-    // Required fields validation
-    if (!mainSymptom || typeof mainSymptom !== 'string' || !mainSymptom.trim()) {
-      return res.status(400).json({
-        success: false,
-        error: 'Main symptom is required.'
-      });
-    }
-
-    if (!duration || typeof duration !== 'string' || !duration.trim()) {
-      return res.status(400).json({
-        success: false,
-        error: 'Duration is required.'
-      });
-    }
-
-    const numericSeverity = Number(severity);
-    if (isNaN(numericSeverity) || numericSeverity < 1 || numericSeverity > 10) {
-      return res.status(400).json({
-        success: false,
-        error: 'Severity must be a number between 1 and 10.'
-      });
-    }
-
-    // Length limit checks
-    if (mainSymptom.length > MAX_FIELD_LENGTH || (context && context.length > MAX_FIELD_LENGTH) || (otherDetails && otherDetails.length > MAX_FIELD_LENGTH)) {
-      return res.status(400).json({
-        success: false,
-        error: `Input fields cannot exceed ${MAX_FIELD_LENGTH} characters.`
-      });
-    }
-
-    const lang = ['en', 'te', 'hi'].includes(language) ? language : 'en';
-
-    // 1. RULE-BASED SAFETY CHECK RUNS FIRST
-    const safetyResult = checkSafety(formData, lang);
+    // 2. RULE-BASED EMERGENCY SAFETY CHECK RUNS FIRST
+    const safetyResult = checkSafety(formData, language);
 
     if (safetyResult.isEmergency) {
       return res.json({
@@ -94,37 +60,40 @@ router.post('/', submissionLimiter, async (req, res) => {
       });
     }
 
-    // 2. SAFE TO RUN SYMPTOM ANALYSIS VIA AI OR DEMO
-    const analysis = await analyzeSymptoms(formData, lang);
+    // 3. SAFE TO RUN SYMPTOM ANALYSIS VIA AI OR DEMO
+    const analysis = await analyzeSymptoms(formData, language);
 
-    // Auto-generate standardized Doctor-Visit Summary
+    // Standardized Doctor-Visit Summary
     const doctorSummary = {
-      patientAgeRange: formData.ageRange || 'Adult',
       symptoms: formData.mainSymptom,
       duration: formData.duration,
       severity: `${formData.severity}/10`,
-      context: formData.context || 'None noted',
-      otherDetails: formData.otherDetails || 'None',
-      urgency: analysis.urgencyLabel || (analysis.urgency === 'urgent' ? 'See a Doctor Soon' : 'Self-Care & Monitor'),
-      suggestedQuestionsForDoctor: analysis.questionsForClinician || [],
-      summaryOverview: analysis.doctorSummaryText
+      ageRange: formData.ageRange || 'Not provided',
+      context: formData.context || 'None reported',
+      urgency: analysis.urgencyLabel || analysis.urgency?.toUpperCase() || 'ROUTINE',
+      recommendedQuestions: analysis.questionsForClinician || [
+        'What could be causing these symptoms?',
+        'Are there any red flags I should monitor for?',
+        'Do you recommend any specific diagnostic tests?'
+      ]
     };
 
     return res.json({
       success: true,
       urgency: analysis.urgency || 'routine',
-      emergency: analysis.urgency === 'emergency',
-      isDemo: analysis.isDemo || false,
-      demoNotice: analysis.demoNotice || null,
+      emergency: false,
       explanation: analysis,
-      doctorSummary
+      doctorSummary,
+      isDemo: analysis.isDemo || false,
+      demoNotice: analysis.demoNotice || null
     });
 
   } catch (error) {
-    console.error('Error handling symptom request:', error.message);
+    console.error('[Symptoms Error]', error.message);
     return res.status(500).json({
       success: false,
-      error: 'An unexpected error occurred while analyzing symptoms. Please try again.'
+      error: 'An unexpected error occurred while analyzing symptoms. Please try again.',
+      urgency: 'routine'
     });
   }
 });

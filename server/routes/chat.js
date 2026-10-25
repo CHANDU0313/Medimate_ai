@@ -2,55 +2,28 @@ import { Router } from 'express';
 import { checkSafety } from '../utils/safetyCheck.js';
 import { generateChatReply } from '../services/geminiService.js';
 import { submissionLimiter } from '../middleware/rateLimiter.js';
+import { chatRequestSchema } from '../utils/schemas.js';
 
 const router = Router();
 
-// Input length guard
-const MAX_MESSAGE_LENGTH = 1500;
-const MAX_MESSAGES_COUNT = 30;
-
 router.post('/', submissionLimiter, async (req, res) => {
   try {
-    const { messages, language = 'en' } = req.body;
-
-    if (!Array.isArray(messages) || messages.length === 0) {
+    // 1. Zod Schema Validation
+    const validation = chatRequestSchema.safeParse(req.body);
+    if (!validation.success) {
       return res.status(400).json({
         success: false,
-        error: 'Messages array is required and cannot be empty.'
+        error: validation.error?.issues?.[0]?.message || 'Invalid chat request format.',
+        details: validation.error?.issues || []
       });
     }
 
-    // Guard array length and individual message length
-    if (messages.length > MAX_MESSAGES_COUNT) {
-      return res.status(400).json({
-        success: false,
-        error: `Maximum history limit (${MAX_MESSAGES_COUNT} messages) exceeded.`
-      });
-    }
+    const { messages, language } = validation.data;
 
-    const latestMessage = messages[messages.length - 1];
-    if (!latestMessage || typeof latestMessage.content !== 'string') {
-      return res.status(400).json({
-        success: false,
-        error: 'Latest message content must be a valid string.'
-      });
-    }
-
-    if (latestMessage.content.length > MAX_MESSAGE_LENGTH) {
-      return res.status(400).json({
-        success: false,
-        error: `Message exceeds maximum allowed length of ${MAX_MESSAGE_LENGTH} characters.`
-      });
-    }
-
-    const lang = ['en', 'te', 'hi'].includes(language) ? language : 'en';
-
-    // 1. RULE-BASED SAFETY CHECK RUNS FIRST (BEFORE ANY AI CALL)
-    // Check both latest message and recent context for red flags
-    const safetyResult = checkSafety({ messages }, lang);
+    // 2. RULE-BASED EMERGENCY SAFETY CHECK RUNS FIRST (BEFORE ANY AI CALL)
+    const safetyResult = checkSafety({ messages }, language);
 
     if (safetyResult.isEmergency) {
-      // Immediate hard-coded emergency response, NEVER AI-generated
       return res.json({
         success: true,
         urgency: 'emergency',
@@ -62,8 +35,8 @@ router.post('/', submissionLimiter, async (req, res) => {
       });
     }
 
-    // 2. SAFE TO PROCEED WITH AI OR DEMO GENERATION
-    const aiResponse = await generateChatReply(messages, lang);
+    // 3. SAFE TO PROCEED WITH AI OR DEMO GENERATION
+    const aiResponse = await generateChatReply(messages, language);
 
     return res.json({
       success: true,
@@ -76,8 +49,7 @@ router.post('/', submissionLimiter, async (req, res) => {
     });
 
   } catch (error) {
-    // Note: Privacy protection - never log user message contents
-    console.error('Error handling chat request:', error.message);
+    console.error('[Chat Error]', error.message);
     return res.status(500).json({
       success: false,
       error: 'An unexpected error occurred while processing your request. Please try again.',
