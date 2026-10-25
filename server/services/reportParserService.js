@@ -4,8 +4,6 @@
  * Strictly educational: does not diagnose disease or prescribe medications.
  */
 
-import { PDFParse } from 'pdf-parse';
-
 // Common diagnostic lab test reference markers
 const TEST_PATTERNS = [
   {
@@ -167,13 +165,20 @@ export function parseReportText(rawText, language = 'en') {
  * Extracts plain text from a PDF buffer safely
  */
 export async function extractTextFromPDF(pdfBuffer) {
+  let parser;
+
   try {
-    const parser = new PDFParse({ data: pdfBuffer });
+    const { PDFParse } = await import('pdf-parse');
+    parser = new PDFParse({ data: pdfBuffer });
     const result = await parser.getText();
-    await parser.destroy();
     return result.text || '';
-  } catch (err) {
-    console.warn('[PDF Parse Warning]', err.message);
-    return '';
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.warn('[PDF Parse Error]', message);
+    throw new Error(`Unable to parse the uploaded PDF: ${message}`, { cause: error });
+  } finally {
+    if (parser) {
+      await parser.destroy();
+    }
   }
 }
