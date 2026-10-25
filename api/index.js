@@ -1,4 +1,5 @@
-// Vercel Serverless Function entrypoint
-import app from '../server/server.js';
-
-export default app;
+// Vercel's CommonJS function wrapper must load the ESM server dynamically.
+export default async function handler(req, res) {
+  const { default: app } = await import('../server/server.js');
+  return app(req, res);
+}
