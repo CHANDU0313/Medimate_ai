@@ -96,8 +96,8 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start Server if run directly
-if (process.env.NODE_ENV !== 'test') {
+// Start the HTTP listener only when this file is the process entrypoint.
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
   app.listen(PORT, () => {
     console.log(`\n======================================================`);
     console.log(` MediMate AI Server running on port ${PORT}`);
