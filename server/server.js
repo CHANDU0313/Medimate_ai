@@ -29,19 +29,22 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false
 }));
 
-// 2. CORS restricted to client origin
-app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps, curl, Vite server-to-server proxy)
-    if (!origin) return callback(null, true);
-    if (origin === CLIENT_ORIGIN || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
-      return callback(null, true);
-    }
-    return callback(new Error('Not allowed by CORS'));
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+// 2. CORS restricted to the configured client and the current application origin
+app.use(cors((req, callback) => {
+  const origin = req.header('Origin');
+  const requestOrigin = `${req.protocol}://${req.get('host')}`;
+  const isAllowed = !origin
+    || origin === CLIENT_ORIGIN
+    || origin === requestOrigin
+    || origin.startsWith('http://localhost:')
+    || origin.startsWith('http://127.0.0.1:');
+
+  callback(isAllowed ? null : new Error('Not allowed by CORS'), {
+    origin: origin || false,
+    credentials: true,
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  });
 }));
 
 // 3. Body parser with strict size limit (protects against DOS/flooding)

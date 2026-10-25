@@ -225,6 +225,7 @@ async function runTests() {
 
     const res = await fetch(`${baseUrl}/api/reports`, {
       method: 'POST',
+      headers: { Origin: baseUrl },
       body: formData
     });
     if (res.status !== 200) throw new Error(`Expected 200, got ${res.status}`);
